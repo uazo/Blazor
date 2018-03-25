@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <AddinId>Blazor</AddinId>
+    <AddinNamespace>Microsoft.VisualStudio.Mac</AddinNamespace>
+    <AddinDetailedName>Blazor Language Services</AddinDetailedName>
+    <AddinCategory>Web Development</AddinCategory>
+    <Description>Language services for ASP.NET Core Blazor</Description>
+  </PropertyGroup>
+</Project>
