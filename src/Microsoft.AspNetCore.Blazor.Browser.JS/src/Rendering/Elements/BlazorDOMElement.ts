@@ -5,7 +5,6 @@ import { BlazorINPUTElement } from './BlazorINPUTElement';
 
 const logicalBlazorDomElementPropname = createSymbolOrFallback('_blazorDomElement');
 const logicalBlazorChildElementPropname = createSymbolOrFallback('_blazorDomChild');
-//const logicalBlazorDomChildArrayPropname = createSymbolOrFallback('_blazorDomChildArrayPropname');
 
 export class BlazorDOMElement {
 	protected readonly browserRenderer: BrowserRenderer;
@@ -201,7 +200,7 @@ export class BlazorDOMElement {
 	}
 
 	public onDOMUpdating() { }
-	public onDOMUpdated() { }
+  public onDOMUpdated() { }
 
 	public dispose() {
 	}

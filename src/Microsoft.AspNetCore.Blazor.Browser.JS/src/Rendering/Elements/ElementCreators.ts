@@ -1,4 +1,4 @@
-﻿import { BrowserRenderer } from '../BrowserRenderer';
+import { BrowserRenderer } from '../BrowserRenderer';
 import { BlazorDOMElement, getBlazorDomElement } from './BlazorDOMElement';
 import { BlazorDOMComponent } from './BlazorDOMComponent';
 import { BlazorINPUTElement } from './BlazorINPUTElement';

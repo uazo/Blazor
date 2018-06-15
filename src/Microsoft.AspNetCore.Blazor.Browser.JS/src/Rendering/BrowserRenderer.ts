@@ -277,8 +277,8 @@ export class BrowserRenderer {
 	}
 }
 
-export function raiseEvent(event: Event, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
-	if (event.preventDefault !== undefined)
+export function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
+  if (event !== null && event.preventDefault !== undefined)
 		event.preventDefault();
 
 	if (!raiseEventMethod) {

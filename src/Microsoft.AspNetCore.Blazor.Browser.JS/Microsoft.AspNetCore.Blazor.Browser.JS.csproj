@@ -16,11 +16,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <WebpackInputs Remove="Blazor.d.ts" />
     <WebpackInputs Remove="src\Interop\RenderingFunction.ts" />
+    <WebpackInputs Remove="src\module.ts" />
     <WebpackInputs Remove="src\Rendering\BlazorDOMComponent.ts" />
     <WebpackInputs Remove="src\Rendering\BlazorDOMElement.ts" />
     <WebpackInputs Remove="src\Rendering\Elements\BlazorINPUTElement.ts" />
     <WebpackInputs Remove="src\Rendering\Elements\ElementCreators.ts" />
+    <WebpackInputs Remove="types\Rendering\Elements\BlazorDOMComponent.d.ts" />
   </ItemGroup>
 
   <Import Project="..\Microsoft.AspNetCore.Blazor.BuildTools\ReferenceFromSource.props" />

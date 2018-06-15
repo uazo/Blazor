@@ -1,0 +1,106 @@
+import * as Blazor from '@blazor';
+import * as Dropzone from 'dropzone';
+
+export class DropZoneElement extends Blazor.BlazorDOMComponent {
+
+  private url: string = '';
+  private authorization: string = '';
+  private myDropzone: Dropzone | null = null;
+
+  protected isDOMAttribute(attributeName: string, value: string | null): boolean {
+    if (attributeName === "Url") {
+      this.url = value!;
+      return false;
+    }
+    else if (attributeName === "data-authorization") {
+      this.authorization = value!;
+      return false;
+    }
+
+    return super.isDOMAttribute(attributeName, value);
+  }
+
+  public onDOMUpdated() {
+    if (this.myDropzone === null) {
+      let _this = this;
+
+      let input = this.getDOMElement().nextSibling! as HTMLElement;
+      this.myDropzone = new Dropzone(input, {
+        url: this.url,
+        addRemoveLinks: true,
+        headers: {
+          'Authorization': this.authorization
+        },
+        removedfile: function (file) {
+          let toDomElement = _this.getDOMElement();
+          let listener = toDomElement['_OnFileRemovedListener'];
+          if (listener !== undefined) {
+            listener({
+              type: "FileRemoved",
+              value: JSON.stringify({
+                FileName: file.name,
+                Size: file.size
+              })
+            });
+          }
+          file.previewElement.remove();
+        },
+        success: function (file, response) {
+          let toDomElement = _this.getDOMElement();
+          let listener = toDomElement['_OnFileAddedListener'];
+          if (listener !== undefined) {
+            listener({
+              type: "FileAdded",
+              value: JSON.stringify({
+                FileName: file.name,
+                Size: file.size,
+                Guid: response
+              })
+            });
+          }
+        }
+      });
+    }
+
+    super.onDOMUpdated();
+  }
+
+  protected applyEvent(attributeName: string, componentId: number, eventHandlerId: number): boolean {
+    var toDomElement = this.getDOMElement();
+    var browserRendererId = this.browserRenderer.browserRendererId;
+    var _this = this;
+
+    if (attributeName === "OnFileAdded") {
+      let listener = function (evt) {
+        _this.raiseEvent(eventHandlerId, new Blazor.EventForDotNet('custom', { type: evt.type, Value: evt.value }));
+      };
+      toDomElement['_OnFileAddedListener'] = listener;
+      return true;
+    } else if (attributeName === "OnFileRemoved") {
+      let listener = function (evt) {
+        _this.raiseEvent(eventHandlerId, new Blazor.EventForDotNet('custom', { type: evt.type, Value: evt.value }));
+      };
+      toDomElement['_OnFileRemovedListener'] = listener;
+      return true;
+    }
+
+    return super.applyEvent(attributeName, componentId, eventHandlerId);
+  }
+
+  public dispose() {
+    if (this.myDropzone !== null) {
+      this.myDropzone.destroy();
+      this.myDropzone = null;
+    }
+
+    super.dispose();
+  }
+}
+
+Blazor.registerFunction('RegisterDropZoneComponentId', (id) => {
+  Blazor.registerCustomDOMElement(id, function (CID, parent, childIndex, br) {
+    return new DropZoneElement(CID, parent, childIndex, br);
+  });
+
+  return true;
+});

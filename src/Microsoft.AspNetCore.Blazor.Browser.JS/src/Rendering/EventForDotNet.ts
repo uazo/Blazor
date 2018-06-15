@@ -219,7 +219,9 @@ function isCheckbox(element: Element | null) {
 
 // The following interfaces must be kept in sync with the UIEventArgs C# classes
 
-type EventArgsType = 'change' | 'clipboard' | 'drag' | 'error' | 'focus' | 'keyboard' | 'mouse' | 'pointer' | 'progress' | 'touch' | 'unknown' | 'wheel';
+export type EventArgsType =
+  'change' | 'clipboard' | 'drag' | 'error' | 'focus' | 'keyboard' | 'mouse' | 'pointer' | 'progress' | 'touch' | 'unknown' | 'wheel'
+  | 'custom';
 
 export interface UIEventArgs {
   type: string;

@@ -16,9 +16,11 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 	/// <typeparam name="T"></typeparam>
 	public class Form<T> : Microsoft.AspNetCore.Blazor.Components.BlazorComponent/*, IForm*/
 	{
-		/// <summary>
-		/// </summary>
-		protected internal ModelStateDictionary ModelState { get; private set; }
+        [Inject] private System.Net.Http.HttpClient HttpClient { get; set; }
+
+        /// <summary>
+        /// </summary>
+        protected internal ModelStateDictionary ModelState { get; private set; }
 
 		private T _Model;
 
@@ -101,6 +103,11 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                 if (currentIsValid != _isValid) this.StateHasChanged();
 			}
 		}
+
+        internal System.Net.Http.HttpClient getHttpClient()
+        {
+            return HttpClient;
+        }
 
         #endregion
 

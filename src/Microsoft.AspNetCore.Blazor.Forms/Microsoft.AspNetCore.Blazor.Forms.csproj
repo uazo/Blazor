@@ -1,14 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <BlazorLinkOnBuild>false</BlazorLinkOnBuild>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Internals\SysBits\**" />
-    <EmbeddedResource Remove="Internals\SysBits\**" />
-    <None Remove="Internals\SysBits\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Internals\Validator.cs" />
@@ -23,4 +19,25 @@
     <ProjectReference Include="..\Microsoft.AspNetCore.Blazor\Microsoft.AspNetCore.Blazor.csproj" />
   </ItemGroup>
 
+    <ItemGroup>
+      <Content Remove="tsconfig.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="content\BlazorDropzone.js" />
+      <EmbeddedResource Remove="content\Boot.ts" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="tsconfig.json" />
+    </ItemGroup>
+
+    <Target Name="RunWebpack" AfterTargets="BeforeBuild">
+        <RemoveDir Directories="dist" />
+        <Exec Command="npm run build" />
+        <ItemGroup>
+            <EmbeddedResource Include="dist\blazor.forms.js" LogicalName="blazor:file:blazor.forms.js" />
+        </ItemGroup>
+    </Target>
+    
 </Project>

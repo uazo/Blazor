@@ -11,3 +11,5 @@ BenchmarkDotNet.Artifacts/
 /src/Microsoft.AspNetCore.Blazor.Browser.JS/npm-debug.log
 /packages
 /src/anglesharp/AngleSharpBuilder/dist
+/src/Microsoft.AspNetCore.Blazor.Forms/node_modules
+/src/Microsoft.AspNetCore.Blazor.Browser.JS/package/blazor.js

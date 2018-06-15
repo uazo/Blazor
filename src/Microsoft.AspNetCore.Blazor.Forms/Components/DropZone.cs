@@ -58,13 +58,10 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
 
 			httpClient.DefaultRequestHeaders.TryGetValues("Authorization", out IEnumerable<string> Items);
 
-			//builder.AddAttribute(0, "data-url", Url);
-			//builder.AddAttribute(0, "data-authorization", Items?.FirstOrDefault());
-			//if (OnFileAdded != null) builder.AddAttribute(0, "onfileadded", OnFileAdded);
-
-			builder.OpenElement(sequence++, "div");
-			builder.AddAttribute(sequence++, "data-authorization", Items?.FirstOrDefault());
-
+            //builder.AddAttribute(0, "data-url", Url);
+            //builder.AddAttribute(0, "data-authorization", Items?.FirstOrDefault());
+            //if (OnFileAdded != null) builder.AddAttribute(0, "onfileadded", OnFileAdded);
+            builder.OpenElement(sequence++, "div");
 			builder.AddAttribute(sequence++, "class", "dropzone needsclick");
 				builder.OpenElement(sequence++, "div");
 					builder.AddAttribute(sequence++, "class", "dz-message needsclick");
