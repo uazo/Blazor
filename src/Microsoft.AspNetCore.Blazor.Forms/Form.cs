@@ -115,7 +115,12 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
         internal void SetValue(PropertyInfo property, object parsedValue)
         {
-            this.ModelState?.SetValue(property, parsedValue);
+            SetValue(property.Name, parsedValue);
+        }
+
+        internal void SetValue(string propertyName, object parsedValue)
+        {
+            this.ModelState?.SetValue(propertyName, parsedValue);
             this.ValidateModel();
             this.StateHasChanged();
         }

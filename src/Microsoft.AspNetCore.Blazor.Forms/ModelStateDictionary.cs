@@ -15,7 +15,6 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         System.Collections.Generic.List<string> propertyChanged;
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="binder"></param>
         public ModelStateDictionary(object binder)
@@ -39,13 +38,14 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                 return property.GetValue(_binder)?.ToString();
         }
 
-        internal void SetValue(PropertyInfo property, object parsedValue)
+        //internal void SetValue(PropertyInfo property, object parsedValue)
+        internal void SetValue(string propertyName, object parsedValue)
         {
-            var propertyType = property.PropertyType;
-            this[property.Name] = parsedValue;
+            //var propertyType = property.PropertyType;
+            this[propertyName] = parsedValue;
 
             if (propertyChanged == null) propertyChanged = new List<string>();
-            if (propertyChanged.Contains(property.Name) == false) propertyChanged.Add(property.Name);
+            if (propertyChanged.Contains(propertyName) == false) propertyChanged.Add(propertyName);
 
             //if (propertyType == typeof(string))
             //	property.SetValue(_binder, (string)parsedValue);

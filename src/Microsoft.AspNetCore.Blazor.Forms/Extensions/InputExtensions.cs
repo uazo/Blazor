@@ -35,7 +35,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 				builder.AddAttribute(sequence++, "type", "text");
 				builder.AddAttribute(sequence++, "name", property.Name);
 				builder.AddAttribute(sequence++, "id", property.Name);
-				builder.AddAttribute(sequence++, "value", (string)currentValue);
+				builder.AddAttribute(sequence++, "value", string.IsNullOrEmpty(currentValue) ? string.Empty : currentValue);
 
 				builder.AddAttribute(sequence++, "onchange", 
 					Microsoft.AspNetCore.Blazor.Components.BindMethods.GetEventHandlerValue<Microsoft.AspNetCore.Blazor.UIChangeEventArgs>(e =>

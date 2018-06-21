@@ -5,6 +5,8 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
 
   private url: string = '';
   private authorization: string = '';
+  private maxFiles: number = 1;
+
   private myDropzone: Dropzone | null = null;
 
   protected isDOMAttribute(attributeName: string, value: string | null): boolean {
@@ -12,8 +14,12 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
       this.url = value!;
       return false;
     }
-    else if (attributeName === "data-authorization") {
+    else if (attributeName === "AuthorizationHeader") {
       this.authorization = value!;
+      return false;
+    }
+    else if (attributeName === "MaxFiles") {
+      this.maxFiles = parseInt( value! );
       return false;
     }
 
@@ -27,13 +33,14 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
       let input = this.getDOMElement().nextSibling! as HTMLElement;
       this.myDropzone = new Dropzone(input, {
         url: this.url,
+        maxFiles: this.maxFiles,
         addRemoveLinks: true,
         headers: {
           'Authorization': this.authorization
         },
         removedfile: function (file) {
           let toDomElement = _this.getDOMElement();
-          let listener = toDomElement['_OnFileRemovedListener'];
+          let listener = toDomElement['_onfileremovedlistener'];
           if (listener !== undefined) {
             listener({
               type: "FileRemoved",
@@ -47,7 +54,7 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
         },
         success: function (file, response) {
           let toDomElement = _this.getDOMElement();
-          let listener = toDomElement['_OnFileAddedListener'];
+          let listener = toDomElement['_onfileaddedlistener'];
           if (listener !== undefined) {
             listener({
               type: "FileAdded",
@@ -70,17 +77,17 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
     var browserRendererId = this.browserRenderer.browserRendererId;
     var _this = this;
 
-    if (attributeName === "OnFileAdded") {
+    if (attributeName === "onfileadded") {
       let listener = function (evt) {
         _this.raiseEvent(eventHandlerId, new Blazor.EventForDotNet('custom', { type: evt.type, Value: evt.value }));
       };
-      toDomElement['_OnFileAddedListener'] = listener;
+      toDomElement['_onfileaddedlistener'] = listener;
       return true;
-    } else if (attributeName === "OnFileRemoved") {
+    } else if (attributeName === "onfileremoved") {
       let listener = function (evt) {
         _this.raiseEvent(eventHandlerId, new Blazor.EventForDotNet('custom', { type: evt.type, Value: evt.value }));
       };
-      toDomElement['_OnFileRemovedListener'] = listener;
+      toDomElement['_onfileremovedlistener'] = listener;
       return true;
     }
 
