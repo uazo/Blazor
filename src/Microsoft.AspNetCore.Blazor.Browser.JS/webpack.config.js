@@ -15,6 +15,8 @@ module.exports = function (env) {
     };
     outputFolder = "package";
     plugins.push(new DtsBundlePlugin());
+
+    console.log("Creating .d.ts");
   }
 
   return {

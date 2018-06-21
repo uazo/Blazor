@@ -17,6 +17,17 @@ export function getRegisteredCustomTag(identifier: string): Function | null;
 export function registerCustomDOMElement(identifier: number, implementation: Function): void;
 export function getRegisteredCustomDOMElement(identifier: number): Function | null;
 
+export class EventForDotNet<TData extends UIEventArgs> {
+    readonly type: EventArgsType;
+    readonly data: TData;
+    constructor(type: EventArgsType, data: TData);
+    static fromDOMEvent(event: Event): EventForDotNet<UIEventArgs>;
+}
+export type EventArgsType = 'change' | 'clipboard' | 'drag' | 'error' | 'focus' | 'keyboard' | 'mouse' | 'pointer' | 'progress' | 'touch' | 'unknown' | 'wheel' | 'custom';
+export interface UIEventArgs {
+    type: string;
+}
+
 export class BrowserRenderer {
     eventDelegator: EventDelegator;
     readonly browserRendererId: number;
@@ -49,17 +60,6 @@ export class BlazorDOMElement {
     dispose(): void;
 }
 export function getBlazorDomElement(container: Node): any;
-
-export class EventForDotNet<TData extends UIEventArgs> {
-    readonly type: EventArgsType;
-    readonly data: TData;
-    constructor(type: EventArgsType, data: TData);
-    static fromDOMEvent(event: Event): EventForDotNet<UIEventArgs>;
-}
-export type EventArgsType = 'change' | 'clipboard' | 'drag' | 'error' | 'focus' | 'keyboard' | 'mouse' | 'pointer' | 'progress' | 'touch' | 'unknown' | 'wheel' | 'custom';
-export interface UIEventArgs {
-    type: string;
-}
 
 export interface Platform {
     start(loadAssemblyUrls: string[]): Promise<void>;

@@ -6,6 +6,7 @@ import { registerCustomTag, registerCustomDOMElement } from './Interop/Rendering
 import { raiseEvent } from './Rendering/BrowserRenderer'
 import { navigateTo } from './Services/UriHelper';
 import { invokeDotNetMethod, invokeDotNetMethodAsync } from './Interop/InvokeDotNetMethodWithJsonMarshalling';
+import { EventForDotNet } from './Rendering/EventForDotNet'
 
 if (typeof window !== 'undefined') {
   // When the library is loaded in a browser via a <script> element, make the
@@ -22,6 +23,7 @@ if (typeof window !== 'undefined') {
 		registerCustomTag,
 		registerCustomDOMElement,
 		BlazorDOMElement,
-		BlazorDOMComponent
+    BlazorDOMComponent,
+    EventForDotNet
   };
 }
