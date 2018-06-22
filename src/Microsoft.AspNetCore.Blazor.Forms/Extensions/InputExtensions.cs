@@ -36,6 +36,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 				builder.AddAttribute(sequence++, "name", property.Name);
 				builder.AddAttribute(sequence++, "id", property.Name);
 				builder.AddAttribute(sequence++, "value", string.IsNullOrEmpty(currentValue) ? string.Empty : currentValue);
+                builder.AddAttribute(sequence++, "autocomplete", "nope");
 
 				builder.AddAttribute(sequence++, "onchange", 
 					Microsoft.AspNetCore.Blazor.Components.BindMethods.GetEventHandlerValue<Microsoft.AspNetCore.Blazor.UIChangeEventArgs>(e =>
@@ -76,8 +77,9 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 				builder.AddAttribute(sequence++, "type", "checkbox");
 				builder.AddAttribute(sequence++, "name", property.Name);
 				builder.AddAttribute(sequence++, "id", property.Name);
-				builder.AddAttribute(sequence++, "value", boolValue);
-				builder.AddAttribute(sequence++, "onchange", new Action<UIChangeEventArgs>(( e ) => {
+                if( boolValue == true) builder.AddAttribute(sequence++, "checked", "checked");
+                builder.AddAttribute(sequence++, "onchange", new Action<UIChangeEventArgs>(( e ) => {
+                    Console.WriteLine("checkbox=" + e.Value);
 					form.SetValue(property, e.Value);
 				}));
 

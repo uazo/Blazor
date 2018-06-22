@@ -31,6 +31,11 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
         public string Url { get; set; }
 
         /// <summary>
+        /// </summary>
+        [Parameter]
+        public string Value { get; set; }
+
+        /// <summary>
         /// 
         /// </summary>
         [Parameter]
@@ -73,20 +78,20 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
 
             builder.OpenElement(sequence++, "div");
 			builder.AddAttribute(sequence++, "class", "dropzone needsclick");
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "dz-message needsclick");
             if (ChildContent == null)
             {
-                builder.OpenElement(sequence++, "div");
-                    builder.AddAttribute(sequence++, "class", "dz-message needsclick");
-                    builder.AddContent(sequence++, "Drop files ");
-                    builder.OpenElement(sequence++, "span");
-                        builder.AddAttribute(sequence++, "class", "dz-note needsclick");
-                    builder.CloseElement();
+                builder.AddContent(sequence++, "Drop files ");
+                builder.OpenElement(sequence++, "span");
+                   builder.AddAttribute(sequence++, "class", "dz-note needsclick");
                 builder.CloseElement();
             }
             else
             {
                 builder.AddContent(sequence++, ChildContent);
             }
+            builder.CloseElement();
             builder.CloseElement();
 
 			//<dropzone>

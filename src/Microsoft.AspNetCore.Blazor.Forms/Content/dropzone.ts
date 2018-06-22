@@ -26,6 +26,10 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
     return super.isDOMAttribute(attributeName, value);
   }
 
+  public onDOMUpdating() {
+    super.onDOMUpdating();
+  }
+
   public onDOMUpdated() {
     if (this.myDropzone === null) {
       let _this = this;

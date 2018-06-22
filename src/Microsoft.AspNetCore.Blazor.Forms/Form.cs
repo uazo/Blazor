@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
         /// <summary>
         /// </summary>
-        protected internal ModelStateDictionary ModelState { get; private set; }
+        public ModelStateDictionary<T> ModelState { get; private set; }
 
 		private T _Model;
 
@@ -33,7 +33,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 			set
 			{
 				_Model = value;
-				ModelState = new ModelStateDictionary(value);
+				ModelState = new ModelStateDictionary<T>(value);
 			}
 		}
 
@@ -113,16 +113,43 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
         #region Set Values
 
-        internal void SetValue(PropertyInfo property, object parsedValue)
+        /// <summary>
+        /// </summary>
+        public object GetValue<V>(Expression<Func<T, V>> Field)
         {
-            SetValue(property.Name, parsedValue);
+            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            return ModelState.GetValue(property);
         }
 
-        internal void SetValue(string propertyName, object parsedValue)
+        /// <summary>
+        /// </summary>
+        public void SetValue<V>(Expression<Func<T, V>> Field, V Value)
         {
-            this.ModelState?.SetValue(propertyName, parsedValue);
+            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            SetValue(property, Value);
+        }
+
+        internal void SetValue(PropertyInfo property, object parsedValue)
+        {
+            SetValue(property.Name, property.PropertyType, parsedValue);
+        }
+
+        private void SetValue(string propertyName, Type propertType, object parsedValue)
+        {
+            this.ModelState?.SetValue(propertyName, propertType, parsedValue);
             this.ValidateModel();
             this.StateHasChanged();
+        }
+
+        internal bool RemoveValue(string propertyName)
+        {
+            if (this.ModelState?.RemoveValue(propertyName) == true)
+            {
+                this.ValidateModel();
+                this.StateHasChanged();
+                return true;
+            }
+            return false;
         }
 
         #endregion
