@@ -45,64 +45,10 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 		protected override void OnParametersSet()
 		{
 			base.OnParametersSet();
-
-			ValidateModel();
+			ModelState?.ValidateModel();
 		}
 
-		#region Validating Stuffs
-
-		private bool _isValid { get; set; }
-
-		internal List<System.ComponentModel.DataAnnotations.ValidationResult> GetValidationResults()
-		{
-			return _validationResults;
-		}
-
-		private List<System.ComponentModel.DataAnnotations.ValidationResult> _validationResults;
-		private System.ComponentModel.DataAnnotations.ValidationContext _context;
-
-		/// <summary>
-		/// Validate the model
-		/// </summary>
-		/// <returns>True if is valid</returns>
-		public bool IsValid()
-		{
-			return _isValid;
-		}
-
-		/// <summary>
-		/// Validate the model
-		/// </summary>
-		public void ValidateModel()
-		{
-			//Console.WriteLine("ValidateModel!");
-
-            bool currentIsValid = _isValid;
-
-			_context = null;
-			_validationResults = null;
-			_isValid = true;
-
-			if (Model != null)
-			{
-                //var t = TypeDescriptor.GetAttributes(typeof(Internals.MasqueradeObject<T>));
-
-                var m = new Internals.MasqueradeObject<T>(Model);
-                m.GetValue = ( pd ) =>
-                {
-                	var value = ModelState.GetValue(pd);
-                	return value;
-                };
-				_context = new System.ComponentModel.DataAnnotations.ValidationContext(m, serviceProvider: null, items: null);
-				_validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
-				_isValid = m.TryValidateObject(_context, _validationResults, ModelState.PropertyChanged);
-                ModelState.ClearChanges();
-
-                //Console.WriteLine($"_isValid = {_isValid}");
-
-                if (currentIsValid != _isValid) this.StateHasChanged();
-			}
-		}
+		#region Internal Stuffs
 
         internal System.Net.Http.HttpClient getHttpClient()
         {
@@ -137,7 +83,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         private void SetValue(string propertyName, Type propertType, object parsedValue)
         {
             this.ModelState?.SetValue(propertyName, propertType, parsedValue);
-            this.ValidateModel();
+            this.ModelState?.ValidateModel();
             this.StateHasChanged();
         }
 
@@ -145,7 +91,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         {
             if (this.ModelState?.RemoveValue(propertyName) == true)
             {
-                this.ValidateModel();
+                this.ModelState?.ValidateModel();
                 this.StateHasChanged();
                 return true;
             }
@@ -153,5 +99,15 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         }
 
         #endregion
+
+        /// <summary>
+        /// </summary>
+        public void ValidateModel()
+        {
+            bool currentIsValid = ModelState.IsValid();
+
+            ModelState?.ValidateModel();
+            if (currentIsValid != ModelState.IsValid()) this.StateHasChanged();
+        }
     }
 }

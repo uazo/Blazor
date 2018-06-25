@@ -29,7 +29,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="Content\gritterdefs.d.ts" />
+    </ItemGroup>
+
+    <ItemGroup>
       <None Include="tsconfig.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <TypeScriptCompile Include="Content\types\gritterdefs.d.ts" />
     </ItemGroup>
 
     <Target Name="RunWebpack" AfterTargets="BeforeBuild">

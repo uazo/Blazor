@@ -11,16 +11,18 @@ namespace Microsoft.AspNetCore.Blazor.Forms
     /// </summary>
     public class ModelStateDictionary<T> : Dictionary<string, object>
     {
-        object _binder;
+        T _binder;
         System.Collections.Generic.List<string> propertyChanged;
 
         /// <summary>
         /// </summary>
         /// <param name="binder"></param>
-        public ModelStateDictionary(object binder)
+        public ModelStateDictionary(T binder)
         {
             _binder = binder;
         }
+
+        #region Get/Set Values
 
         internal object GetValue(PropertyDescriptor property)
         {
@@ -79,11 +81,19 @@ namespace Microsoft.AspNetCore.Blazor.Forms
             return false;
         }
 
+        #endregion
+
+        #region Changes
+
         internal System.Collections.Generic.List<string> PropertyChanged { get { return propertyChanged; } }
         internal void ClearChanges()
         {
             propertyChanged = null;
         }
+
+        #endregion
+
+        #region Update Model
 
         /// <summary>
         /// </summary>
@@ -96,5 +106,75 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                     prop.SetValue(model, this[prop.Name]);
             }
         }
+
+        #endregion
+
+        #region Custom Errors
+
+        /// <summary>
+        /// </summary>
+        public void AddModelError(string Field, string Message )
+        {
+            var r = new System.ComponentModel.DataAnnotations.ValidationResult(Message, new string[] { Field });
+            _validationResults.Add(r);
+        }
+
+        /// <summary>
+        /// </summary>
+        public void ClearErrors()
+        {
+            _validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+            _isValid = true;
+        }
+
+        #endregion
+
+        #region Validation Result
+
+        private List<System.ComponentModel.DataAnnotations.ValidationResult> _validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+        private System.ComponentModel.DataAnnotations.ValidationContext _context;
+
+        internal List<System.ComponentModel.DataAnnotations.ValidationResult> GetValidationResults()
+        {
+            return _validationResults;
+        }
+
+        private bool _isValid { get; set; }
+
+        /// <summary>
+        /// Validate the model
+        /// </summary>
+        /// <returns>True if is valid</returns>
+        public bool IsValid()
+        {
+            return _isValid;
+        }
+
+        /// <summary>
+        /// Validate the model
+        /// </summary>
+        public void ValidateModel()
+        {
+            //Console.WriteLine("ValidateModel!");
+
+            _context = null;
+            ClearErrors();
+
+            if (_binder != null)
+            {
+                var m = new Internals.MasqueradeObject<T>(_binder);
+                m.GetValue = (pd) =>
+                {
+                    var value = this.GetValue(pd);
+                    return value;
+                };
+                _context = new System.ComponentModel.DataAnnotations.ValidationContext(m, serviceProvider: null, items: null);
+                _isValid = m.TryValidateObject(_context, _validationResults, this.PropertyChanged);
+                this.ClearChanges();
+
+                //Console.WriteLine($"_isValid = {_isValid}");
+            }
+        }
+        #endregion
     }
 }

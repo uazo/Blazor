@@ -7,7 +7,8 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
-        "@types/dropzone": "5.0.4"
+        "@types/dropzone": "5.0.4",
+        "gritter": "1.7.4"
     },
     "devDependencies": {
         "@types/emscripten": "0.0.31",
