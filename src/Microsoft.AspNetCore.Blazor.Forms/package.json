@@ -1,19 +1,22 @@
 {
-    "version": "1.0.0",
-    "name": "blazor.forms",
-    "private": true,
-    "scripts": {
-        "build": "webpack",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "dependencies": {
-        "@types/dropzone": "5.0.4",
-        "gritter": "1.7.4"
-    },
-    "devDependencies": {
-        "@types/emscripten": "0.0.31",
-        "typescript": "^2.6.1",
-        "webpack": "^3.8.1",
-        "ts-loader": "^3.2.0"
-    }
+  "version": "1.0.0",
+  "name": "blazor.forms",
+  "private": true,
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@types/bootstrap.v3.datetimepicker": "4.17.46",
+    "@types/dropzone": "5.0.4",
+    "eonasdan-bootstrap-datetimepicker": "4.17.47",
+    "gritter": "1.7.4",
+    "moment-timezone": "0.4.1"
+  },
+  "devDependencies": {
+    "@types/emscripten": "0.0.31",
+    "typescript": "^2.6.1",
+    "webpack": "^3.8.1",
+    "ts-loader": "^3.2.0"
+  }
 }

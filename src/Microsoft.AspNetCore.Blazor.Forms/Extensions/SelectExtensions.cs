@@ -11,21 +11,22 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 	{
 		/// <summary>
 		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <typeparam name="V"></typeparam>
-		/// <param name="form"></param>
-		/// <param name="Field"></param>
-		/// <param name="selectList"></param>
-		/// <param name="htmlAttributes"></param>
-		/// <returns></returns>
 		public static Microsoft.AspNetCore.Blazor.RenderFragment DropDownListFor<T, V>(
-			this Microsoft.AspNetCore.Blazor.Forms.Form<T> form,
+			this IForm<T> form,
+			Expression<Func<T, V>> Field,
+			IEnumerable<SelectListItem> selectList,
+			object htmlAttributes = null ) => form.ModelState.DropDownListFor(Field, selectList, htmlAttributes);
+
+		/// <summary>
+		/// </summary>
+		public static Microsoft.AspNetCore.Blazor.RenderFragment DropDownListFor<T, V>(
+            this ModelStateDictionary<T> model, 
 			Expression<Func<T, V>> Field,
 			IEnumerable<SelectListItem> selectList,
 			object htmlAttributes = null )
 		{
 			var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
-			string currentValue = form.ModelState.GetValue(property);
+			string currentValue = model.GetValue(property);
 
 			return ( builder ) =>
 			{
@@ -36,7 +37,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 				builder.AddAttribute(sequence++, "id", property.Name);
 				builder.AddAttribute(sequence++, "value", (string)currentValue);
 				builder.AddAttribute(sequence++, "onchange", new Action<UIChangeEventArgs>(( e ) => {
-					form.SetValue(property, e.Value);
+					model.SetValue(property.Name, property.PropertyType, e.Value);
 				}));
 
 				ExtensionsFunctions.WriteHtmlAttributes(builder, ref sequence, htmlAttributes);

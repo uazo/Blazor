@@ -1,7 +1,7 @@
 import * as Blazor from '@blazor';
 import * as Dropzone from 'dropzone';
 
-export class DropZoneElement extends Blazor.BlazorDOMComponent {
+class DropZoneElement extends Blazor.BlazorDOMComponent {
 
   private url: string = '';
   private authorization: string = '';
@@ -45,7 +45,7 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
         removedfile: function (file) {
           let toDomElement = _this.getDOMElement();
           let listener = toDomElement['_onfileremovedlistener'];
-          if (listener !== undefined) {
+          if (listener !== undefined && listener !== null) {
             listener({
               type: "FileRemoved",
               value: JSON.stringify({
@@ -59,7 +59,7 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
         success: function (file, response) {
           let toDomElement = _this.getDOMElement();
           let listener = toDomElement['_onfileaddedlistener'];
-          if (listener !== undefined) {
+          if (listener !== undefined && listener !== null) {
             listener({
               type: "FileAdded",
               value: JSON.stringify({
@@ -100,6 +100,10 @@ export class DropZoneElement extends Blazor.BlazorDOMComponent {
 
   public dispose() {
     if (this.myDropzone !== null) {
+      let toDomElement = this.getDOMElement();
+      toDomElement['_onfileaddedlistener'] = null;
+      toDomElement['_onfileremovedlistener'] = null;
+
       this.myDropzone.destroy();
       this.myDropzone = null;
     }

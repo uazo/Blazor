@@ -47,24 +47,43 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
         internal void SetValue(string propertyName, Type propertyType, object parsedValue)
         {
-            this[propertyName] = parsedValue;
-
             if (parsedValue != null)
             {
-                if( propertyType == typeof(string))
+                var value = parsedValue.ToString();
+
+                if (propertyType == typeof(string))
                 {
-                    this[propertyName] = parsedValue.ToString();
+                    this[propertyName] = value;
                 }
-                else if (propertyType == typeof(int))
+                else if (propertyType == typeof(int) || propertyType == typeof(int?))
                 {
-                    if (int.TryParse(parsedValue.ToString(), out int v))
+                    if (int.TryParse(value, out int v))
+                        this[propertyName] = v;
+                    else if (bool.TryParse(value, out bool vb))
+                        this[propertyName] = (vb == true ? 1 : 0);
+                }
+                else if (propertyType == typeof(bool) || propertyType == typeof(bool?))
+                {
+                    if (bool.TryParse(value, out bool v))
                         this[propertyName] = v;
                 }
-                else if( propertyType == typeof(bool))
+                else if (propertyType == typeof(double))
                 {
-                    if (bool.TryParse(parsedValue.ToString(), out bool v))
+                    if (double.TryParse(value, out double v))
                         this[propertyName] = v;
                 }
+                else if (propertyType == typeof(float))
+                {
+                    if (float.TryParse(value, out float v))
+                        this[propertyName] = v;
+                }
+                else if( propertyType == typeof(System.DateTime) || propertyType == typeof(System.DateTime?) )
+                {
+                    if (System.DateTime.TryParse(value, out System.DateTime v))
+                        this[propertyName] = v;
+                }
+                else
+                    throw new ApplicationException($"Unknown type {propertyType.Name}");
             }
 
             if (propertyChanged == null) propertyChanged = new List<string>();
@@ -97,13 +116,27 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
         /// <summary>
         /// </summary>
+        public void Update()
+        {
+            this.Update(_binder);
+        }
+
+        /// <summary>
+        /// </summary>
         public void Update(T model)
         {
             var properties = TypeDescriptor.GetProperties(model);
             foreach (PropertyDescriptor prop in properties)
             {
-                if( this.ContainsKey(prop.Name) )
+                if (this.ContainsKey(prop.Name))
+                {
+                    Console.WriteLine($"{prop.Name}={this[prop.Name]}");
                     prop.SetValue(model, this[prop.Name]);
+                }
+                else
+                {
+                    Console.WriteLine($"NO {prop.Name}");
+                }
             }
         }
 

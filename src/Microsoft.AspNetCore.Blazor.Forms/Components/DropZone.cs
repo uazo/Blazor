@@ -63,14 +63,6 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
         [Parameter]
         public RenderFragment ChildContent { get; set; }
 
-        ///// <inheritdoc />
-        //public override void SetParameters(ParameterCollection parameters)
-        //{
-        //    parameters.TryGetValue(RenderTreeBuilder.ChildContent, out ChildContent);
-
-        //    base.SetParameters(parameters);
-        //}
-
         /// <inheritdoc />
         protected override void BuildRenderTree( RenderTreeBuilder builder )
 		{

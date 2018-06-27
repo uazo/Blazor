@@ -10,10 +10,8 @@ namespace Microsoft.AspNetCore.Blazor.Forms
     /// </summary>
     public static class Factory
     {
-        /// <summary>
-        /// 
-        /// </summary>
         internal static int DropZoneComponentId { get; private set; }
+        internal static int DateTimePickerComponentId { get; private set; }
 
         /// <summary>
         /// Register custom DOMComponent
@@ -22,6 +20,10 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         {
             DropZoneComponentId = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(Components.DropZone));
             Blazor.Browser.Interop.RegisteredFunction.Invoke<bool>("RegisterDropZoneComponentId", DropZoneComponentId);
+
+            DateTimePickerComponentId = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(Components.DatePicker));
+            Blazor.Browser.Interop.RegisteredFunction.Invoke<bool>("RegisterDateTimePickerComponentId", DateTimePickerComponentId);
+
             return services;
         }
     }

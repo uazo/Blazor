@@ -14,13 +14,13 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 	/// <summary>
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class Form<T> : Microsoft.AspNetCore.Blazor.Components.BlazorComponent/*, IForm*/
+	public class Form<T> : Microsoft.AspNetCore.Blazor.Components.BlazorComponent, IForm<T>
 	{
         [Inject] private System.Net.Http.HttpClient HttpClient { get; set; }
 
         /// <summary>
         /// </summary>
-        public ModelStateDictionary<T> ModelState { get; private set; }
+        public ModelStateDictionary<T> ModelState { get; set; }
 
 		private T _Model;
 

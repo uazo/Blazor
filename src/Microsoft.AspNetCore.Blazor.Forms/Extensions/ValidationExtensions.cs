@@ -14,29 +14,30 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
     public static class ValidationExtensions
     {
         /// <summary>
-        /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="V"></typeparam>
-        /// <param name="form"></param>
-        /// <param name="Field"></param>
-        /// <param name="htmlAttributes"></param>
-        /// <returns></returns>
         public static Microsoft.AspNetCore.Blazor.RenderFragment ValidationMessageFor<T, V>(
-          this Microsoft.AspNetCore.Blazor.Forms.Form<T> form,
+          this IForm<T> form,
           Expression<Func<T, V>> Field,
-          object htmlAttributes = null)
+          object htmlAttributes = null) => form.ModelState.ValidationMessageFor(Field, htmlAttributes, form as ICustomValidationMessage);
+
+        /// <summary>
+        /// </summary>
+        public static Microsoft.AspNetCore.Blazor.RenderFragment ValidationMessageFor<T, V>(
+           this ModelStateDictionary<T> model,
+          Expression<Func<T, V>> Field,
+          object htmlAttributes = null,
+          ICustomValidationMessage customValidationMessage = null)
         {
             var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
             var name = property.Name;
 
             return (builder) =>
             {
-                string errorDescription = form.ModelState?.GetValidationResults()?
+                string errorDescription = model.GetValidationResults()?
                     .Where(x => ((IEnumerable<string>)x.MemberNames).Contains(name))
                     .Select(x => x.ErrorMessage)
                     .FirstOrDefault();
-                WriteMessage(form as ICustomValidationMessage, builder, name, errorDescription, htmlAttributes);
+                WriteMessage(customValidationMessage, builder, name, errorDescription, htmlAttributes);
             };
         }
 

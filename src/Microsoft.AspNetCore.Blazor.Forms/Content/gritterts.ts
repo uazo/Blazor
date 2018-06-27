@@ -1,4 +1,6 @@
+import * as $ from 'jquery';
 import * as Blazor from '@blazor';
+import 'gritter';
 import '@gritterts';
 
 Blazor.registerFunction('ShowGritterMessage', (title, text) => {
