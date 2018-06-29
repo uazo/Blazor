@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -17,14 +17,16 @@ namespace Microsoft.AspNetCore.Blazor.Components
         /// Lists all the types 
         /// </summary>
         /// <param name="appAssembly"></param>
+        /// <param name="assignableFrom"></param>
         /// <returns></returns>
-        public static IEnumerable<Type> ResolveComponents(Assembly appAssembly)
+        public static IEnumerable<Type> ResolveComponents(Assembly appAssembly, Type assignableFrom = null)
         {
             var blazorAssembly = typeof(IComponent).Assembly;
+            if (assignableFrom == null) assignableFrom = typeof(IComponent);
 
             return EnumerateAssemblies(appAssembly.GetName(), blazorAssembly, new HashSet<Assembly>(new AssemblyComparer()))
                 .SelectMany(a => a.ExportedTypes)
-                .Where(t => typeof(IComponent).IsAssignableFrom(t));
+                .Where(t => assignableFrom.IsAssignableFrom(t));
         }
 
         private static IEnumerable<Assembly> EnumerateAssemblies(

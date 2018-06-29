@@ -23,12 +23,26 @@ namespace Microsoft.AspNetCore.Blazor.Routing
             var routes = new List<RouteEntry>();
             foreach (var type in types)
             {
-                var routeAttributes = type.GetCustomAttributes<RouteAttribute>(); // Inherit: true?
-                foreach (var routeAttribute in routeAttributes)
+                if (typeof(RouteComponent).IsAssignableFrom(type))
                 {
-                    var template = TemplateParser.ParseTemplate(routeAttribute.Template);
-                    var entry = new RouteEntry(template, type);
-                    routes.Add(entry);
+                    RouteComponent instance = (RouteComponent)Activator.CreateInstance(type);
+                    var routeAttributes = instance.GetRoutes();
+                    foreach (var routeAttribute in routeAttributes)
+                    {
+                        var template = TemplateParser.ParseTemplate(routeAttribute.Template);
+                        var entry = new RouteEntry(template, routeAttribute.ComponentType);
+                        routes.Add(entry);
+                    }
+                }
+                else
+                {
+                    var routeAttributes = type.GetCustomAttributes<RouteAttribute>(); // Inherit: true?
+                    foreach (var routeAttribute in routeAttributes)
+                    {
+                        var template = TemplateParser.ParseTemplate(routeAttribute.Template);
+                        var entry = new RouteEntry(template, type);
+                        routes.Add(entry);
+                    }
                 }
             }
 

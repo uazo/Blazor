@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Blazor.Components;
 using Microsoft.AspNetCore.Blazor.Layouts;
 using Microsoft.AspNetCore.Blazor.RenderTree;
 using Microsoft.AspNetCore.Blazor.Services;
+using System.Linq;
 
 namespace Microsoft.AspNetCore.Blazor.Routing
 {
@@ -46,7 +47,8 @@ namespace Microsoft.AspNetCore.Blazor.Routing
         public void SetParameters(ParameterCollection parameters)
         {
             parameters.AssignToProperties(this);
-            var types = ComponentResolver.ResolveComponents(AppAssembly);
+            var types = ComponentResolver.ResolveComponents(AppAssembly)
+                        .Union(ComponentResolver.ResolveComponents(AppAssembly, typeof(RouteComponent)));
             Routes = RouteTable.Create(types);
             Refresh();
         }
