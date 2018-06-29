@@ -28,8 +28,10 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Internals
 					mp.CustomAttributes.Add(new DecimalValidationAttribute());
 				else if (prop.PropertyType == typeof(bool))
 					mp.CustomAttributes.Add(new BooleanValidationAttribute());
+                else if (prop.PropertyType == typeof(System.DateTime))
+                    mp.CustomAttributes.Add(new DateTimeValidationAttribute());
 
-				list.Add(mp);
+                list.Add(mp);
 			}
 			return new PropertyDescriptorCollection(list.ToArray());
 		}

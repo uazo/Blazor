@@ -17,15 +17,14 @@ class DateTimePickerComponent extends Blazor.BlazorDOMComponent {
   }
 
   onDOMUpdated() {
-    if (this.DatePicker == null) {
+    if (this.DatePicker === null) {
       let input = this.getDOMElement().nextSibling! as HTMLElement;
       let value = new Date(((input.firstChild) as HTMLInputElement).value);
       let _this = this;
-      
+
       if (input !== null) {
         this.DatePicker = $(input).datetimepicker({
           locale: moment.locale('it'),
-          format: this.Format!
         }).data("DateTimePicker");
 
         this.DatePicker!.date(value);
@@ -43,6 +42,10 @@ class DateTimePickerComponent extends Blazor.BlazorDOMComponent {
           }
         });
       }
+    }
+
+    if (this.DatePicker !== null) {
+      if (this.Format !== null) this.DatePicker!.format(this.Format);
     }
     super.onDOMUpdated();
   }

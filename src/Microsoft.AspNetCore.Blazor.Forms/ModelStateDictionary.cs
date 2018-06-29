@@ -22,7 +22,24 @@ namespace Microsoft.AspNetCore.Blazor.Forms
             _binder = binder;
         }
 
+        /// <summary>
+        /// </summary>
+        public T Binder { get { return _binder; } }
+
         #region Get/Set Values
+
+        internal bool ContainsValue(PropertyInfo property)
+        {
+            return this.ContainsKey(property.Name);
+        }
+
+        /// <summary>
+        /// </summary>
+        public V GetValue<V>(Expression<Func<T, V>> Field)
+        {
+            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            return (V)GetValue(property);
+        }
 
         internal object GetValue(PropertyDescriptor property)
         {
@@ -32,17 +49,20 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                 return property.GetValue(_binder);
         }
 
-        internal string GetValue(PropertyInfo property)
+        internal object GetValue(PropertyInfo property)
         {
             if (this.ContainsKey(property.Name))
-                return this[property.Name]?.ToString();
+                return this[property.Name];
             else
-                return property.GetValue(_binder)?.ToString();
+                return property.GetValue(_binder);
         }
 
-        internal bool ContainsValue(PropertyInfo property)
+        /// <summary>
+        /// </summary>
+        public void SetValue<V>(Expression<Func<T, V>> Field, V Value)
         {
-            return this.ContainsKey(property.Name);
+            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            SetValue(property.Name, property.PropertyType, Value);
         }
 
         internal void SetValue(string propertyName, Type propertyType, object parsedValue)
@@ -77,17 +97,34 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                     if (float.TryParse(value, out float v))
                         this[propertyName] = v;
                 }
-                else if( propertyType == typeof(System.DateTime) || propertyType == typeof(System.DateTime?) )
+                else if (propertyType == typeof(System.DateTime) || propertyType == typeof(System.DateTime?))
                 {
                     if (System.DateTime.TryParse(value, out System.DateTime v))
                         this[propertyName] = v;
                 }
+                else if (propertyType == typeof(System.Enum) || propertyType.IsEnum)
+                {
+                    if (int.TryParse(value, out int v))
+                        this[propertyName] = v;
+                    else
+                    {
+                        try
+                        {
+                            this[propertyName] = System.Enum.Parse(propertyType, value);
+                        }
+                        catch { }
+                    }
+                }
                 else
                     throw new ApplicationException($"Unknown type {propertyType.Name}");
+
+                //Console.WriteLine($"Setting {propertyName} of type {propertyType.Name} value {value}");
             }
 
             if (propertyChanged == null) propertyChanged = new List<string>();
             if (propertyChanged.Contains(propertyName) == false) propertyChanged.Add(propertyName);
+
+            this.ValidateModel();
         }
 
         internal bool RemoveValue(string propertyName)
@@ -143,6 +180,14 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         #endregion
 
         #region Custom Errors
+
+        /// <summary>
+        /// </summary>
+        public void AddModelError<V>(Expression<Func<T, V>> Field, string Message)
+        {
+            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            AddModelError(property.Name, Message);
+        }
 
         /// <summary>
         /// </summary>
@@ -203,11 +248,23 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                 };
                 _context = new System.ComponentModel.DataAnnotations.ValidationContext(m, serviceProvider: null, items: null);
                 _isValid = m.TryValidateObject(_context, _validationResults, this.PropertyChanged);
+
+                this.OnCustomValidateModel();
+                if (_isValid == true && _validationResults.Count != 0) _isValid = false;
+
                 this.ClearChanges();
 
                 //Console.WriteLine($"_isValid = {_isValid}");
             }
         }
+
+        /// <summary>
+        /// Provide custom validator
+        /// </summary>
+        protected virtual void OnCustomValidateModel()
+        {
+        }
+
         #endregion
     }
 }

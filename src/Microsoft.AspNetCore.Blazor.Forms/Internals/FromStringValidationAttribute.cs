@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -79,4 +79,19 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Internals
 				return false;
 		}
 	}
+
+    internal class DateTimeValidationAttribute : ValidationAttribute
+    {
+        internal DateTimeValidationAttribute()
+        {
+        }
+
+        public override bool IsValid(object value)
+        {
+            if (System.DateTime.TryParse(value?.ToString(), out System.DateTime v))
+                return true;
+            else
+                return false;
+        }
+    }
 }

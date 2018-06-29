@@ -33,16 +33,23 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 			set
 			{
 				_Model = value;
-				ModelState = new ModelStateDictionary<T>(value);
+				ModelState = CreateModelState(value);
 			}
 		}
 
-		/// <summary>
-		/// Method invoked when the component has received parameters from its parent in
-		/// the render tree, and the incoming values have been assigned to properties.
-		/// Invoke ValidateModel()
-		/// </summary>
-		protected override void OnParametersSet()
+        /// <summary>
+        /// </summary>
+        protected virtual ModelStateDictionary<T> CreateModelState(T value)
+        {
+            return new ModelStateDictionary<T>(value);
+        }
+
+        /// <summary>
+        /// Method invoked when the component has received parameters from its parent in
+        /// the render tree, and the incoming values have been assigned to properties.
+        /// Invoke ValidateModel()
+        /// </summary>
+        protected override void OnParametersSet()
 		{
 			base.OnParametersSet();
 			ModelState?.ValidateModel();
@@ -59,44 +66,43 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
         #region Set Values
 
-        /// <summary>
-        /// </summary>
-        public object GetValue<V>(Expression<Func<T, V>> Field)
-        {
-            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
-            return ModelState.GetValue(property);
-        }
+        ///// <summary>
+        ///// </summary>
+        //public object GetValue<V>(Expression<Func<T, V>> Field)
+        //{
+        //    var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+        //    return ModelState.GetValue(property);
+        //}
 
-        /// <summary>
-        /// </summary>
-        public void SetValue<V>(Expression<Func<T, V>> Field, V Value)
-        {
-            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
-            SetValue(property, Value);
-        }
+        ///// <summary>
+        ///// </summary>
+        //public void SetValue<V>(Expression<Func<T, V>> Field, V Value)
+        //{
+        //    var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+        //    SetValue(property, Value);
+        //}
 
-        internal void SetValue(PropertyInfo property, object parsedValue)
-        {
-            SetValue(property.Name, property.PropertyType, parsedValue);
-        }
+        //internal void SetValue(PropertyInfo property, object parsedValue)
+        //{
+        //    SetValue(property.Name, property.PropertyType, parsedValue);
+        //}
 
-        private void SetValue(string propertyName, Type propertType, object parsedValue)
-        {
-            this.ModelState?.SetValue(propertyName, propertType, parsedValue);
-            this.ModelState?.ValidateModel();
-            this.StateHasChanged();
-        }
+        //private void SetValue(string propertyName, Type propertType, object parsedValue)
+        //{
+        //    this.ModelState?.SetValue(propertyName, propertType, parsedValue);
+        //    this.StateHasChanged();
+        //}
 
-        internal bool RemoveValue(string propertyName)
-        {
-            if (this.ModelState?.RemoveValue(propertyName) == true)
-            {
-                this.ModelState?.ValidateModel();
-                this.StateHasChanged();
-                return true;
-            }
-            return false;
-        }
+        //internal bool RemoveValue(string propertyName)
+        //{
+        //    if (this.ModelState?.RemoveValue(propertyName) == true)
+        //    {
+        //        this.ModelState?.ValidateModel();
+        //        this.StateHasChanged();
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
         #endregion
 

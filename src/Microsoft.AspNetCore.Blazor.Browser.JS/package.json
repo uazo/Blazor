@@ -12,6 +12,7 @@
     "typescript": "^2.6.1",
     "webpack": "^3.8.1",
     "ts-loader": "^3.2.0",
-    "dts-bundle": "0.7.3"
+    "dts-bundle": "0.7.3",
+    "tapable": "1.0.0"
   }
 }

@@ -15,7 +15,8 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
         public static Microsoft.AspNetCore.Blazor.RenderFragment DateTimePickerFor<T, V>(
             this IForm<T> form,
             Expression<Func<T, V>> Field,
-            object htmlAttributes = null) => form.ModelState.DateTimePickerFor(Field, htmlAttributes);
+            object htmlAttributes = null,
+            string Format = null) => form.ModelState.DateTimePickerFor(Field, htmlAttributes, Format);
 
         /// <summary>
         /// </summary>
@@ -27,7 +28,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
         {
             var property = Internals.PropertyHelpers.GetProperty(Field);
 
-            System.DateTime.TryParse( model.GetValue(property), out System.DateTime currentValue);
+            System.DateTime.TryParse( model.GetValue(property)?.ToString(), out System.DateTime currentValue);
 
             return (builder) =>
             {

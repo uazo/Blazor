@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 			object htmlAttributes = null )
 		{
 			var property = Internals.PropertyHelpers.GetProperty(Field);
-			string currentValue = model.GetValue(property);
+			string currentValue = model.GetValue(property)?.ToString();
 
 			return ( builder ) =>
 			{
@@ -75,7 +75,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 }
             }
 
-            Console.WriteLine($"CheckBoxFor value={currentValue} {boolValue}");
+            //Console.WriteLine($"CheckBoxFor value={currentValue} {boolValue}");
         
             return ( builder ) =>
 			{
@@ -113,7 +113,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
             string DisplayName = null)
 		{
 			var property = Internals.PropertyHelpers.GetProperty(Field);
-			string currentValue = model.GetValue(property);
+			string currentValue = model.GetValue(property)?.ToString();
 
 			return ( builder ) =>
 			{

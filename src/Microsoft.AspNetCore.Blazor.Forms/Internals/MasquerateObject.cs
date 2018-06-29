@@ -121,15 +121,21 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Internals
                 if (PropertiesToValidate != null && !PropertiesToValidate.Contains(prop.Name))
                     continue;
 
-                //Console.WriteLine(prop.Name);
-
                 object value = this.GetValue(prop);
                 var attrs = prop.Attributes.OfType<ValidationAttribute>();
 
                 validationContext.MemberName = prop.Name;
                 validationContext.DisplayName = prop.DisplayName;
-                isValid &= Validator.TryValidateValue(value, validationContext, validationResults, attrs);
+
+                bool _valid = Validator.TryValidateValue(value, validationContext, validationResults, attrs);
+                isValid &= _valid;
+
+                //Console.WriteLine($"Validate: {prop.Name} value: {value} attrs:{attrs?.Count()} valid={_valid}");
             }
+
+            //var custom = this._parent as IValidatableObject;
+            //if (custom != null)
+            //    custom.Validate(validationContext);
 
             return isValid;
         }
