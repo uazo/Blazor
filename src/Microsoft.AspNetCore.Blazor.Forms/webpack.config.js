@@ -5,7 +5,7 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js'],
     alias: {
-      '@blazor': path.join(__dirname, '../Microsoft.AspNetCore.Blazor.Browser.JS/package/types/index.d.ts'),
+      '@blazor': path.join(__dirname, '../Microsoft.AspNetCore.Blazor.Browser.JS/package/index.d.ts'),
       '@gritterts': path.join(__dirname, './content/types/gritterdefs.d.ts'),
       'gritter': path.join(__dirname, './node_modules/gritter/js/jquery.gritter.js')
     }
