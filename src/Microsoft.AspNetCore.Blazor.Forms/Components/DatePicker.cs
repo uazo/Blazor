@@ -56,7 +56,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
                 //Console.WriteLine(d);
             }
 
-            ExtensionsFunctions.WriteHtmlAttributes(builder, ref sequence, HtmlAttributes);
+            builder.WriteHtmlAttributes(ref sequence, HtmlAttributes);
             builder.CloseElement();
 
             builder.OpenElement(sequence++, "span");

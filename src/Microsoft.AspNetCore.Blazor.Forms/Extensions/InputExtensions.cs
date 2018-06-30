@@ -45,7 +45,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 					}
 				));
 
-				ExtensionsFunctions.WriteHtmlAttributes(builder, ref sequence, htmlAttributes);
+                builder.WriteHtmlAttributes(ref sequence, htmlAttributes);
 
 				builder.CloseElement();
 			};
@@ -91,7 +91,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                     model.SetValue(property.Name, property.PropertyType, e.Value);
 				}));
 
-				ExtensionsFunctions.WriteHtmlAttributes(builder, ref sequence, htmlAttributes);
+                builder.WriteHtmlAttributes(ref sequence, htmlAttributes);
 
 				builder.CloseElement();
 			};
@@ -122,7 +122,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 				builder.OpenElement(sequence++, "label");
 				builder.AddAttribute(sequence++, "for", property.Name);
 
-				ExtensionsFunctions.WriteHtmlAttributes(builder, ref sequence, htmlAttributes);
+                builder.WriteHtmlAttributes(ref sequence, htmlAttributes);
 
                 if(DisplayName == null) builder.AddContent(sequence++, ExtensionsFunctions.GetDisplayName(property));
 				builder.CloseElement();

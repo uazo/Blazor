@@ -13,19 +13,16 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
 	public class DropZone : Blazor.Components.BlazorComponent
 	{
         /// <summary>
-        /// 
         /// </summary>
         [Parameter]
         public string Name { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
         [Parameter]
         public string Id { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
         [Parameter]
         public string Url { get; set; }
@@ -36,7 +33,6 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
         public string Value { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
         [Parameter]
         public string AuthorizationHeader { get; set; }
@@ -47,13 +43,11 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
         public int MaxFiles { get; set; } = 1;
 
         /// <summary>
-        /// 
         /// </summary>
         [Parameter]
         public Action<UICustomEventArgs> OnFileAdded { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
         [Parameter]
         public Action<UICustomEventArgs> OnFileRemoved { get; set; }
@@ -62,6 +56,18 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
         /// </summary>
         [Parameter]
         public RenderFragment ChildContent { get; set; }
+
+        /// <summary>
+        /// </summary>
+        [Inject] private System.Net.Http.HttpClient httpClient { get; set; }
+
+        /// <inheritsdoc/>
+        protected override void OnParametersSet()
+        {
+            httpClient.DefaultRequestHeaders.TryGetValues("Authorization", out IEnumerable<string> Items);
+            this.AuthorizationHeader = Items?.FirstOrDefault();
+            base.OnParametersSet();
+        }
 
         /// <inheritdoc />
         protected override void BuildRenderTree( RenderTreeBuilder builder )

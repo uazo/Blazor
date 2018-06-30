@@ -10,8 +10,8 @@ namespace Microsoft.AspNetCore.Blazor.Forms
     /// </summary>
     public static class Factory
     {
-        internal static int DropZoneComponentId { get; private set; }
-        internal static int DateTimePickerComponentId { get; private set; }
+        private static int DropZoneComponentId { get; set; }
+        private static int DateTimePickerComponentId { get; set; }
 
         /// <summary>
         /// Register custom DOMComponent

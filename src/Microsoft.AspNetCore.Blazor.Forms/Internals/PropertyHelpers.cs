@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -24,8 +24,6 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Internals
 			}
 			if (memberExpr == null) throw new ArgumentException("method");
 
-			//string objectName = typeof(T).Name;
-			//string propertyName = memberExpr.Member.Name;
 			var property = memberExpr.Member as System.Reflection.PropertyInfo;
 			return property;
 		}

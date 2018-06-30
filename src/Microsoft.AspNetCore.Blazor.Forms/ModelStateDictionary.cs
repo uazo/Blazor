@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
     public class ModelStateDictionary<T> : Dictionary<string, object>
     {
         T _binder;
-        System.Collections.Generic.List<string> propertyChanged;
+        List<string> propertyChanged;
 
         /// <summary>
         /// </summary>
@@ -141,7 +141,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
         #region Changes
 
-        internal System.Collections.Generic.List<string> PropertyChanged { get { return propertyChanged; } }
+        internal List<string> PropertyChanged { get { return propertyChanged; } }
         internal void ClearChanges()
         {
             propertyChanged = null;
@@ -167,13 +167,13 @@ namespace Microsoft.AspNetCore.Blazor.Forms
             {
                 if (this.ContainsKey(prop.Name))
                 {
-                    Console.WriteLine($"{prop.Name}={this[prop.Name]}");
+                    //Console.WriteLine($"{prop.Name}={this[prop.Name]}");
                     prop.SetValue(model, this[prop.Name]);
                 }
-                else
-                {
-                    Console.WriteLine($"NO {prop.Name}");
-                }
+                //else
+                //{
+                //    Console.WriteLine($"NO {prop.Name}");
+                //}
             }
         }
 
@@ -212,7 +212,9 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         private List<System.ComponentModel.DataAnnotations.ValidationResult> _validationResults = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
         private System.ComponentModel.DataAnnotations.ValidationContext _context;
 
-        internal List<System.ComponentModel.DataAnnotations.ValidationResult> GetValidationResults()
+        /// <summary>
+        /// </summary>
+        public List<System.ComponentModel.DataAnnotations.ValidationResult> GetValidationResults()
         {
             return _validationResults;
         }
@@ -240,7 +242,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
             if (_binder != null)
             {
-                var m = new Internals.MasqueradeObject<T>(_binder);
+                var m = new Internals.ProxyObject<T>(_binder);
                 m.GetValue = (pd) =>
                 {
                     var value = this.GetValue(pd);

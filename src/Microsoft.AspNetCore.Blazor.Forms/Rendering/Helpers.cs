@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Microsoft.AspNetCore.Blazor.Forms.Internals
+namespace Microsoft.AspNetCore.Blazor.Forms.Rendering
 {
     /// <summary>
     /// </summary>
@@ -13,7 +13,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Internals
     {
         /// <summary>
         /// </summary>
-        public static Dictionary<string, object> AnonymousObjectToHtmlAttributes(object htmlAttributes)
+        public static Dictionary<string, object> AnonymousObjectToAttributes(object htmlAttributes)
         {
             Dictionary<string, object> result = new Dictionary<string, object>();
 

@@ -13,13 +13,4 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// </summary>
         ModelStateDictionary<T> ModelState { get; set; }
     }
-
-    /// <summary>
-    /// </summary>
-    public interface ICustomValidationMessage
-	{
-		/// <summary>
-		/// </summary>
-		void WriteValidationMessage( RenderTreeBuilder builder, string PropertyName, string Message, object htmlAttributes );
-	}
 }

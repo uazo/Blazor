@@ -13,7 +13,6 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
     public static class DropZoneExtensions
     {
         /// <summary>
-        /// 
         /// </summary>
         public class DropZoneOptions
         {
@@ -113,9 +112,6 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 builder.AddAttribute(sequence++, "MaxFiles", options.MaxFiles);
                 builder.AddAttribute(sequence++, "Value", currentValue == null ? string.Empty : currentValue);
 
-                form.getHttpClient().DefaultRequestHeaders.TryGetValues("Authorization", out IEnumerable<string> Items);
-                builder.AddAttribute(sequence++, "AuthorizationHeader", Items?.FirstOrDefault());
-
                 builder.AddAttribute(sequence++, "onfileadded", args =>
                 {
                     var customArgs = args as UICustomEventArgs;
@@ -130,7 +126,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                     options.InvokeOnFileRemoved(form, property, fileArgs);
                 });
 
-                ExtensionsFunctions.WriteHtmlAttributes(builder, ref sequence, htmlAttributes);
+                builder.WriteHtmlAttributes(ref sequence, htmlAttributes);
 
                 if (options.GetUrl != null)
                 {

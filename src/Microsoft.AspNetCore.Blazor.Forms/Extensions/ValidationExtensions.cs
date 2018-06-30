@@ -18,7 +18,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
         public static Microsoft.AspNetCore.Blazor.RenderFragment ValidationMessageFor<T, V>(
           this IForm<T> form,
           Expression<Func<T, V>> Field,
-          object htmlAttributes = null) => form.ModelState.ValidationMessageFor(Field, htmlAttributes, form as ICustomValidationMessage);
+          object htmlAttributes = null) => form.ModelState.ValidationMessageFor(Field, htmlAttributes, form as Rendering.ICustomValidationMessage);
 
         /// <summary>
         /// </summary>
@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
            this ModelStateDictionary<T> model,
           Expression<Func<T, V>> Field,
           object htmlAttributes = null,
-          ICustomValidationMessage customValidationMessage = null)
+          Rendering.ICustomValidationMessage customValidationMessage = null)
         {
             var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
             var name = property.Name;
@@ -41,7 +41,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
             };
         }
 
-        private static void WriteMessage(ICustomValidationMessage customMessage,
+        private static void WriteMessage(Rendering.ICustomValidationMessage customMessage,
             RenderTreeBuilder builder,
             string name, string errorDescription, object htmlAttributes = null)
         {
@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                     builder.OpenElement(sequence++, "p");
                     builder.AddContent(sequence++, errorDescription);
 
-                    ExtensionsFunctions.WriteHtmlAttributes(builder, ref sequence, htmlAttributes);
+                    builder.WriteHtmlAttributes(ref sequence, htmlAttributes);
 
                     builder.CloseElement();
                 }

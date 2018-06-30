@@ -7,7 +7,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Internals
 {
 	internal class CustomPropertiesProvider
 	{
-		internal static PropertyDescriptorCollection GetPropertiesInternal( Type type, Attribute[] attributes, MasqueradeObjectBase parent )
+		internal static PropertyDescriptorCollection GetPropertiesInternal( Type type, Attribute[] attributes, ProxyObjectBase parent )
 		{
 			//Console.WriteLine("GetPropertiesInternal");
 

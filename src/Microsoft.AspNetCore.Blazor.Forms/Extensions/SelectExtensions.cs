@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
         public static Microsoft.AspNetCore.Blazor.RenderFragment DropDownListFor<T, V>(
           this IForm<T> form,
           Expression<Func<T, V>> Field,
-          IEnumerable<SelectListItem> selectList,
+          IEnumerable<Rendering.SelectListItem> selectList,
           object htmlAttributes = null) => form.ModelState.DropDownListFor(Field, selectList, htmlAttributes);
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
         public static Microsoft.AspNetCore.Blazor.RenderFragment DropDownListFor<T, V>(
                 this ModelStateDictionary<T> model,
           Expression<Func<T, V>> Field,
-          IEnumerable<SelectListItem> selectList,
+          IEnumerable<Rendering.SelectListItem> selectList,
           object htmlAttributes = null)
         {
             var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
@@ -48,7 +48,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                     model.SetValue(property.Name, property.PropertyType, e.Value);
                 }));
 
-                ExtensionsFunctions.WriteHtmlAttributes(builder, ref sequence, htmlAttributes);
+                builder.WriteHtmlAttributes(ref sequence, htmlAttributes);
 
                 foreach (var item in selectList)
                 {
