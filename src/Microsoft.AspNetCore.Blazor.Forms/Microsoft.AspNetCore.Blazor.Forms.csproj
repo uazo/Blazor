@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Internals\TypeConverter.cs" />
-    <Compile Remove="Internals\Validator.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.1" />
   </ItemGroup>
 
@@ -21,24 +16,8 @@
   </ItemGroup>
 
     <ItemGroup>
-      <Content Remove="tsconfig.json" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="content\BlazorDropzone.js" />
-      <EmbeddedResource Remove="content\Boot.ts" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Content\gritterdefs.d.ts" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="tsconfig.json" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <TypeScriptCompile Include="Content\types\gritterdefs.d.ts" />
+        <Content Remove="tsconfig.json" />
+        <None Include="tsconfig.json" />
     </ItemGroup>
 
     <Target Name="RunWebpack" AfterTargets="BeforeBuild">
