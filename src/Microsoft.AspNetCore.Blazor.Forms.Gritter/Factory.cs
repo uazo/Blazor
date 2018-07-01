@@ -8,12 +8,14 @@ namespace Microsoft.AspNetCore.Blazor.Forms
     /// <summary>
     /// 
     /// </summary>
-    public static class Factory
+    public static class GritterFactory
     {
+        private static int DropZoneComponentId { get; set; }
+
         /// <summary>
         /// Register custom DOMComponent
         /// </summary>
-        public static IServiceCollection AddForms(this IServiceCollection services)
+        public static IServiceCollection AddGritter(this IServiceCollection services)
         {
             return services;
         }

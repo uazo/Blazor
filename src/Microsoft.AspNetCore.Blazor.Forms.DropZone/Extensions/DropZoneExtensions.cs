@@ -60,7 +60,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
             /// </summary>
             internal protected virtual void InvokeOnFileAdded<T>(Form<T> form, System.Reflection.PropertyInfo Property, DropZone.FileEventArgs args)
             {
-                form.ModelState.SetValue(Property.Name, Property.PropertyType, args.Guid);
+                form.ModelState.SetValue(Property, args.Guid);
                 OnFileAdded?.Invoke(Property.Name, args);
             }
 
@@ -72,8 +72,8 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
             /// </summary>
             internal protected virtual void InvokeOnFileRemoved<T>(Form<T> form, System.Reflection.PropertyInfo Property, DropZone.FileEventArgs args)
             {
-                if( form.ModelState.RemoveValue(Property.Name) == false)
-                    form.ModelState.SetValue(Property.Name, Property.PropertyType, null);
+                if( form.ModelState.RemoveValue(Property) == false)
+                    form.ModelState.SetValue(Property, null);
 
                 OnFileRemoved?.Invoke(Property.Name, args);
             }
@@ -97,7 +97,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
         {
             if (options == null) options = new DropZoneOptions();
 
-            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            var property = Extensions.PropertyHelpers.GetProperty<T, V>(Field);
             string currentValue = form.ModelState.GetValue(property)?.ToString();
             //Console.WriteLine($"currentValue={currentValue}");
 

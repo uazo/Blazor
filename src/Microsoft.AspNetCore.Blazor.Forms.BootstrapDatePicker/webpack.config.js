@@ -19,10 +19,11 @@ module.exports = {
     rules: [{ test: /\.ts?$/, loader: 'ts-loader' }],
     noParse: [/moment.js/]
   },
-  entry: { 'blazor.forms': './Content/Boot.ts' },
+  entry: { 'blazor.forms.datepicker': './src/Boot.ts' },
   output: { path: path.join(__dirname, '/dist'), filename: '[name].js' },
   externals: {
     '@blazor': "window['Blazor']",
+    'bootstrap.v3.datetimepicker': "''",
     'jquery': "window['$']"
   }
 };

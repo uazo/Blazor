@@ -19,7 +19,7 @@ module.exports = {
     rules: [{ test: /\.ts?$/, loader: 'ts-loader' }],
     noParse: [/moment.js/]
   },
-  entry: { 'blazor.forms': './Content/Boot.ts' },
+  entry: { 'blazor.forms.dropzone': './src/Boot.ts' },
   output: { path: path.join(__dirname, '/dist'), filename: '[name].js' },
   externals: {
     '@blazor': "window['Blazor']",

@@ -10,7 +10,8 @@
 
         "baseUrl": "./",
         "paths": {
-            "@blazor": [ "..\\Microsoft.AspNetCore.Blazor.Browser.JS\\package\\index.d.ts" ]
+            "@blazor": [ "..\\Microsoft.AspNetCore.Blazor.Browser.JS\\package\\index.d.ts" ],
+            "@gritterts": [ ".\\src\\types\\gritterdefs.d.ts" ]
         }
     },
     "exclude": [

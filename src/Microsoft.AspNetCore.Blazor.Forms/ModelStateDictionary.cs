@@ -13,6 +13,10 @@ namespace Microsoft.AspNetCore.Blazor.Forms
     {
         private static bool _EnableLog = false;
 
+        /// <summary>
+        /// </summary>
+        public Action<UIChangeEventArgs> OnChange { get; set; }
+
         T _binder;
 
         // linker please include...
@@ -49,7 +53,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// </summary>
         public object GetValue<V>(Expression<Func<T, V>> Field)
         {
-            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            var property = Extensions.PropertyHelpers.GetProperty<T, V>(Field);
             return GetValue(property);
         }
 
@@ -61,7 +65,9 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                 return property.GetValue(_binder);
         }
 
-        internal object GetValue(PropertyInfo property)
+        /// <summary>
+        /// </summary>
+        public object GetValue(PropertyInfo property)
         {
             if (this.ContainsKey(property.Name))
                 return this[property.Name];
@@ -73,8 +79,15 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// </summary>
         public void SetValue<V>(Expression<Func<T, V>> Field, V Value)
         {
-            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
-            SetValue(property.Name, property.PropertyType, Value);
+            var property = Extensions.PropertyHelpers.GetProperty<T, V>(Field);
+            SetValue(property, Value);
+        }
+
+        /// <summary>
+        /// </summary>
+        public void SetValue(PropertyInfo propertyInfo, object Value)
+        {
+            SetValue(propertyInfo.Name, propertyInfo.PropertyType, Value);
         }
 
         internal void SetValue(string propertyName, Type propertyType, object parsedValue)
@@ -106,6 +119,17 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                 Log($"Setting {propertyName} of type {propertyType.Name} value {value}");
             }
             this.ValidateModel();
+            OnChange?.Invoke(new UIChangeEventArgs()
+            {
+                Value = parsedValue
+            });
+        }
+
+        /// <summary>
+        /// </summary>
+        public bool RemoveValue(PropertyInfo propertyInfo)
+        {
+            return RemoveValue(propertyInfo.Name);
         }
 
         internal bool RemoveValue(string propertyName)
@@ -169,7 +193,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// </summary>
         public void AddModelError<V>(Expression<Func<T, V>> Field, string Message)
         {
-            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            var property = Extensions.PropertyHelpers.GetProperty<T, V>(Field);
             AddModelError(property.Name, Message);
         }
 

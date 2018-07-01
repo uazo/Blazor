@@ -6,11 +6,15 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Blazor.RenderTree;
 
-namespace Microsoft.AspNetCore.Blazor.Forms.Internals
+namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 {
-	internal static class PropertyHelpers
+    /// <summary>
+    /// </summary>
+	public static class PropertyHelpers
 	{
-		internal static PropertyInfo GetProperty<T,V>( Expression<Func<T, V>> field )
+        /// <summary>
+        /// </summary>
+		public static PropertyInfo GetProperty<T,V>( Expression<Func<T, V>> field )
 		{
 			LambdaExpression lambda = field as LambdaExpression;
 			MemberExpression memberExpr = null;

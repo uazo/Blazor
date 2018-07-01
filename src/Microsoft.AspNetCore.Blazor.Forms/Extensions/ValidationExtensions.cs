@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
           object htmlAttributes = null,
           Rendering.ICustomValidationMessage customValidationMessage = null)
         {
-            var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
+            var property = Extensions.PropertyHelpers.GetProperty<T, V>(Field);
             var name = property.Name;
 
             return (builder) =>

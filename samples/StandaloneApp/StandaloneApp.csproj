@@ -9,6 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Forms.BootstrapDatePicker\Microsoft.AspNetCore.Blazor.Forms.BootstrapDatePicker.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Forms.DropZone\Microsoft.AspNetCore.Blazor.Forms.DropZone.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Forms.Gritter\Microsoft.AspNetCore.Blazor.Forms.Gritter.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Forms\Microsoft.AspNetCore.Blazor.Forms.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor\Microsoft.AspNetCore.Blazor.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Browser\Microsoft.AspNetCore.Blazor.Browser.csproj" />

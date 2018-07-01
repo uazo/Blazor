@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Blazor.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -26,7 +27,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
               object htmlAttributes = null,
               string Format = null)
         {
-            var property = Internals.PropertyHelpers.GetProperty(Field);
+            var property = Extensions.PropertyHelpers.GetProperty(Field);
 
             System.DateTime.TryParse( model.GetValue(property)?.ToString(), out System.DateTime currentValue);
 
@@ -43,7 +44,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 builder.AddAttribute(sequence++, "onchange",
                     Blazor.Components.BindMethods.GetEventHandlerValue<UICustomEventArgs>( (e) =>
                 {
-                    model.SetValue(property.Name, property.PropertyType, e.Value);
+                    model.SetValue( property, e.Value);
                 }));
 
                 builder.CloseComponent();

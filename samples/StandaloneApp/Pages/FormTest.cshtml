@@ -47,7 +47,7 @@
     <div class="form-group row m-b-15">
         @this.LabelFor(m => m.DateTimeValue, new { @class = "col-md-4 col-sm-4 col-form-label" })
         <div class="col-md-8 col-sm-8">
-            @this.TextBoxFor(m => m.DateTimeValue, new { @class = "form-control" })
+            @this.DateTimePickerFor(m => m.DateTimeValue, new { @class = "form-control" }, Format: "DD/MM/YYYY")
             @this.ValidationMessageFor(m => m.DateTimeValue)
         </div>
     </div>
@@ -221,6 +221,10 @@
       this.Model = new StandaloneApp.Models.TestModel();
       this.Model.Email = "pp";
 
+      this.ModelState.OnChange += (e) =>
+      {
+          this.StateHasChanged();
+      };
       base.OnInit();
   }
 

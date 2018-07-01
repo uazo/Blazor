@@ -69,7 +69,10 @@ class DateTimePickerComponent extends Blazor.BlazorDOMComponent {
     let toDomElement = this.getDOMElement();
     toDomElement['_onchange'] = null;
 
-    if( this.DatePicker != null) this.DatePicker.destroy();
+    if (this.DatePicker != null) {
+      this.DatePicker.destroy();
+      this.DatePicker = null;
+    }
     super.dispose();
   }
 }

@@ -5,7 +5,9 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js'],
     alias: {
-      '@blazor': path.join(__dirname, '../Microsoft.AspNetCore.Blazor.Browser.JS/package/index.d.ts')
+      '@blazor': path.join(__dirname, '../Microsoft.AspNetCore.Blazor.Browser.JS/package/index.d.ts'),
+      '@gritterts': path.join(__dirname, './src/types/gritterdefs.d.ts'),
+      'gritter': path.join(__dirname, './node_modules/gritter/js/jquery.gritter.js')
     }
   },
   devtool: 'inline-source-map',
@@ -19,10 +21,11 @@ module.exports = {
     rules: [{ test: /\.ts?$/, loader: 'ts-loader' }],
     noParse: [/moment.js/]
   },
-  entry: { 'blazor.forms': './Content/Boot.ts' },
+  entry: { 'blazor.forms.gritter': './src/Boot.ts' },
   output: { path: path.join(__dirname, '/dist'), filename: '[name].js' },
   externals: {
     '@blazor': "window['Blazor']",
+    '@gritterts': "''",
     'jquery': "window['$']"
   }
 };
