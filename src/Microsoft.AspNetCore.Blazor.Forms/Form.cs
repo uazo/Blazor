@@ -57,10 +57,10 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// </summary>
         public void ValidateModel()
         {
-            bool currentIsValid = ModelState.IsValid();
+            bool currentIsValid = ModelState.IsValid;
 
             ModelState?.ValidateModel();
-            if (currentIsValid != ModelState.IsValid()) this.StateHasChanged();
+            if (currentIsValid != ModelState.IsValid) this.StateHasChanged();
         }
     }
 }

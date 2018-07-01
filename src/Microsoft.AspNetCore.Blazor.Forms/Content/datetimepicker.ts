@@ -1,11 +1,10 @@
 import * as $ from 'jquery';
 import * as Blazor from '@blazor';
-import 'bootstrap.v3.datetimepicker';
 import 'eonasdan-bootstrap-datetimepicker';
 import * as moment from 'moment-timezone';
 
 class DateTimePickerComponent extends Blazor.BlazorDOMComponent {
-  DatePicker: BootstrapV3DatetimePicker.Datetimepicker | null = null;
+  DatePicker: EonasdanBootstrapDatetimepicker.Datetimepicker | null = null;
   Format: string | null = null;
 
   protected isDOMAttribute(attributeName: string, value: string | null): boolean {

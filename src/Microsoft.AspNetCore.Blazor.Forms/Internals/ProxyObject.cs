@@ -12,7 +12,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Internals
 {
 	/// <summary>
 	/// </summary>
-	public class MasqueradeObjectTypeDescriptionProvider : TypeDescriptionProvider
+	internal class MasqueradeObjectTypeDescriptionProvider : TypeDescriptionProvider
 	{
 		private static TypeDescriptionProvider defaultTypeProvider =
 								TypeDescriptor.GetProvider(typeof(ProxyObject<>));

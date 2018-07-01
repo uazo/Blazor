@@ -35,7 +35,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 builder.OpenElement(sequence++, "select");
                 builder.AddAttribute(sequence++, "name", property.Name);
                 builder.AddAttribute(sequence++, "id", property.Name);
-                if (currentValue.GetType().IsEnum)
+                if (property.PropertyType.IsEnum && currentValue.GetType().IsEnum)
                 {
                     builder.AddAttribute(sequence++, "value", (int)currentValue);
                 }

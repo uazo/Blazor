@@ -7,11 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@types/bootstrap.v3.datetimepicker": "4.17.46",
     "@types/dropzone": "5.0.4",
+    "@types/eonasdan-bootstrap-datetimepicker": "4.17.26",
     "eonasdan-bootstrap-datetimepicker": "4.17.47",
     "gritter": "1.7.4",
-    "moment-timezone": "0.4.1"
+    "dropzone": "5.4.0"
   },
   "devDependencies": {
     "@types/emscripten": "0.0.31",

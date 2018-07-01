@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Internals\TypeConverter.cs" />
     <Compile Remove="Internals\Validator.cs" />
   </ItemGroup>
 

@@ -18,7 +18,8 @@ module.exports = {
     })
   ],
   module: {
-    rules: [{ test: /\.ts?$/, loader: 'ts-loader' }]
+    rules: [{ test: /\.ts?$/, loader: 'ts-loader' }],
+    noParse: [/moment.js/]
   },
   entry: { 'blazor.forms': './Content/Boot.ts' },
   output: { path: path.join(__dirname, '/dist'), filename: '[name].js' },

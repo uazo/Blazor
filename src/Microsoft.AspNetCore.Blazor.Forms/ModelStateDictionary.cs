@@ -11,8 +11,20 @@ namespace Microsoft.AspNetCore.Blazor.Forms
     /// </summary>
     public class ModelStateDictionary<T> : Dictionary<string, object>
     {
+        private static bool _EnableLog = false;
+
         T _binder;
-        List<string> propertyChanged;
+
+        // linker please include...
+        static TypeConverter[] _tc = new TypeConverter[] {
+            new StringConverter(),
+            new Int32Converter(), new Int16Converter(), new Int64Converter(),
+            new DateTimeConverter(),
+            new SingleConverter(), new DoubleConverter(),
+            new GuidConverter(),
+            new EnumConverter(typeof(object)),
+            new NullableConverter(typeof(int?))
+        };
 
         /// <summary>
         /// </summary>
@@ -35,10 +47,10 @@ namespace Microsoft.AspNetCore.Blazor.Forms
 
         /// <summary>
         /// </summary>
-        public V GetValue<V>(Expression<Func<T, V>> Field)
+        public object GetValue<V>(Expression<Func<T, V>> Field)
         {
             var property = Internals.PropertyHelpers.GetProperty<T, V>(Field);
-            return (V)GetValue(property);
+            return GetValue(property);
         }
 
         internal object GetValue(PropertyDescriptor property)
@@ -70,60 +82,29 @@ namespace Microsoft.AspNetCore.Blazor.Forms
             if (parsedValue != null)
             {
                 var value = parsedValue.ToString();
+                this[propertyName] = value;
 
-                if (propertyType == typeof(string))
+                TypeConverter typeConverter = TypeDescriptor.GetConverter(propertyType);
+                if (typeConverter.CanConvertFrom(typeof(string)))
                 {
-                    this[propertyName] = value;
-                }
-                else if (propertyType == typeof(int) || propertyType == typeof(int?))
-                {
-                    if (int.TryParse(value, out int v))
-                        this[propertyName] = v;
-                    else if (bool.TryParse(value, out bool vb))
-                        this[propertyName] = (vb == true ? 1 : 0);
-                }
-                else if (propertyType == typeof(bool) || propertyType == typeof(bool?))
-                {
-                    if (bool.TryParse(value, out bool v))
-                        this[propertyName] = v;
-                }
-                else if (propertyType == typeof(double))
-                {
-                    if (double.TryParse(value, out double v))
-                        this[propertyName] = v;
-                }
-                else if (propertyType == typeof(float))
-                {
-                    if (float.TryParse(value, out float v))
-                        this[propertyName] = v;
-                }
-                else if (propertyType == typeof(System.DateTime) || propertyType == typeof(System.DateTime?))
-                {
-                    if (System.DateTime.TryParse(value, out System.DateTime v))
-                        this[propertyName] = v;
-                }
-                else if (propertyType == typeof(System.Enum) || propertyType.IsEnum)
-                {
-                    if (int.TryParse(value, out int v))
-                        this[propertyName] = v;
-                    else
+                    try
                     {
-                        try
-                        {
-                            this[propertyName] = System.Enum.Parse(propertyType, value);
-                        }
-                        catch { }
+                        this[propertyName] = typeConverter.ConvertFromString(value);
+                        Log($"typeConverter for {propertyType.Name} {typeConverter.GetType().Name} {this[propertyName]} isnull={this[propertyName] == null}");
+                    }
+                    catch
+                    {
+                    }
+
+                    if (propertyType == typeof(System.DateTime) && string.IsNullOrWhiteSpace(value))
+                    {
+                        // special case for datetime
+                        // typeConverter.ConvertFromString("") returns System.DateTime.MinValue
+                        this[propertyName] = null; 
                     }
                 }
-                else
-                    throw new ApplicationException($"Unknown type {propertyType.Name}");
-
-                //Console.WriteLine($"Setting {propertyName} of type {propertyType.Name} value {value}");
+                Log($"Setting {propertyName} of type {propertyType.Name} value {value}");
             }
-
-            if (propertyChanged == null) propertyChanged = new List<string>();
-            if (propertyChanged.Contains(propertyName) == false) propertyChanged.Add(propertyName);
-
             this.ValidateModel();
         }
 
@@ -135,16 +116,6 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                 return true;
             }
             return false;
-        }
-
-        #endregion
-
-        #region Changes
-
-        internal List<string> PropertyChanged { get { return propertyChanged; } }
-        internal void ClearChanges()
-        {
-            propertyChanged = null;
         }
 
         #endregion
@@ -167,8 +138,21 @@ namespace Microsoft.AspNetCore.Blazor.Forms
             {
                 if (this.ContainsKey(prop.Name))
                 {
-                    //Console.WriteLine($"{prop.Name}={this[prop.Name]}");
-                    prop.SetValue(model, this[prop.Name]);
+                    object value = this[prop.Name];
+                    if (prop.PropertyType.IsAssignableFrom(value?.GetType()))
+                    {
+                        prop.SetValue(model, value);
+                        Log($"{prop.Name}={value} (IsAssignableFrom)");
+                    }
+                    else if( value == null && Nullable.GetUnderlyingType(prop.PropertyType) != null)
+                    {
+                        prop.SetValue(model, null);
+                        Log($"{prop.Name}={value} (Nullable)");
+                    }
+                    else
+                    {
+                        Log($"{prop.Name}={value} (NOT AssignableFrom)");
+                    }
                 }
                 //else
                 //{
@@ -225,9 +209,9 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// Validate the model
         /// </summary>
         /// <returns>True if is valid</returns>
-        public bool IsValid()
+        public bool IsValid
         {
-            return _isValid;
+            get { return _isValid; }
         }
 
         /// <summary>
@@ -235,7 +219,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// </summary>
         public void ValidateModel()
         {
-            //Console.WriteLine("ValidateModel!");
+            Log("ValidateModel!");
 
             _context = null;
             ClearErrors();
@@ -249,14 +233,12 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                     return value;
                 };
                 _context = new System.ComponentModel.DataAnnotations.ValidationContext(m, serviceProvider: null, items: null);
-                _isValid = m.TryValidateObject(_context, _validationResults, this.PropertyChanged);
+                _isValid = m.TryValidateObject(_context, _validationResults, null);
 
                 this.OnCustomValidateModel();
                 if (_isValid == true && _validationResults.Count != 0) _isValid = false;
 
-                this.ClearChanges();
-
-                //Console.WriteLine($"_isValid = {_isValid}");
+                Log($"_isValid = {_isValid}");
             }
         }
 
@@ -265,6 +247,18 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// </summary>
         protected virtual void OnCustomValidateModel()
         {
+        }
+
+        #endregion
+
+        #region Log
+
+        void Log(string message)
+        {
+            if( _EnableLog == true)
+            {
+                Console.WriteLine(message);
+            }
         }
 
         #endregion

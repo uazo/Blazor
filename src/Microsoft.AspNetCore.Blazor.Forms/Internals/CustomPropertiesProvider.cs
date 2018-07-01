@@ -15,21 +15,30 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Internals
 			var properties = TypeDescriptor.GetProperties(type, attributes);
 			foreach (PropertyDescriptor prop in properties)
 			{
-				//Console.WriteLine($"prop={prop.Name}");
+                //Console.WriteLine($"prop={prop.Name}");
 
-				var mp = new MasqueradeProperty(prop, parent);
-				if (prop.PropertyType == typeof(int))
-					mp.CustomAttributes.Add(new IntegerValidationAttribute());
-				else if (prop.PropertyType == typeof(double))
-					mp.CustomAttributes.Add(new DoubleValidationAttribute());
-				else if (prop.PropertyType == typeof(float))
-					mp.CustomAttributes.Add(new FloatValidationAttribute());
-				else if (prop.PropertyType == typeof(decimal))
-					mp.CustomAttributes.Add(new DecimalValidationAttribute());
-				else if (prop.PropertyType == typeof(bool))
-					mp.CustomAttributes.Add(new BooleanValidationAttribute());
-                else if (prop.PropertyType == typeof(System.DateTime))
-                    mp.CustomAttributes.Add(new DateTimeValidationAttribute());
+                var propertyType = prop.PropertyType;
+                var isNullable = false;
+                var nullableType = Nullable.GetUnderlyingType(propertyType);
+                if( nullableType != null )
+                {
+                    propertyType = nullableType;
+                    isNullable = true;
+                }
+
+                var mp = new MasqueradeProperty(prop, parent);
+				if (propertyType == typeof(int))
+					mp.CustomAttributes.Add(new IntegerValidationAttribute(isNullable));
+                else if (propertyType == typeof(double))
+					mp.CustomAttributes.Add(new DoubleValidationAttribute(isNullable));
+				else if (propertyType == typeof(float))
+					mp.CustomAttributes.Add(new FloatValidationAttribute(isNullable));
+				else if (propertyType == typeof(decimal))
+					mp.CustomAttributes.Add(new DecimalValidationAttribute(isNullable));
+				else if (propertyType == typeof(bool))
+					mp.CustomAttributes.Add(new BooleanValidationAttribute(isNullable));
+                else if (propertyType == typeof(System.DateTime))
+                    mp.CustomAttributes.Add(new DateTimeValidationAttribute(isNullable));
 
                 list.Add(mp);
 			}
