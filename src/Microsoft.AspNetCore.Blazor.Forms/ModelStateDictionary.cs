@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -41,6 +42,46 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// <summary>
         /// </summary>
         public T Binder { get { return _binder; } }
+
+        #region Simil Tag-Helper
+
+        /// <summary>
+        /// </summary>
+        public string this[Expression<Func<T,object>> Field]
+        {
+            get
+            {
+                return GetValue<object>(Field)?.ToString();
+            }
+            set
+            {
+                var property = Extensions.PropertyHelpers.GetProperty<T, object>(Field);
+                SetValue(property, value);
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        public string ValidationFor(Expression<Func<T, object>> Field)
+        {
+            var property = Extensions.PropertyHelpers.GetProperty<T, object>(Field);
+
+            string errorDescription = this.GetValidationResults()?
+                .Where(x => ((IEnumerable<string>)x.MemberNames).Contains(property.Name))
+                .Select(x => x.ErrorMessage)
+                .FirstOrDefault();
+            return errorDescription;
+        }
+
+        /// <summary>
+        /// </summary>
+        public string DisplayName(Expression<Func<T, object>> Field)
+        {
+            var property = Extensions.PropertyHelpers.GetProperty<T, object>(Field);
+            return Extensions.ExtensionsFunctions.GetDisplayName(property);
+        }
+
+        #endregion
 
         #region Get/Set Values
 
