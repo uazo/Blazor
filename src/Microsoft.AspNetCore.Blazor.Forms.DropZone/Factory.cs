@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         public static IServiceCollection AddDropZone(this IServiceCollection services)
         {
             DropZoneComponentId = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(Components.DropZone));
-            JSRuntime.Current.InvokeAsync<bool>("RegisterDropZoneComponentId", DropZoneComponentId);
+            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDropZoneComponentId", DropZoneComponentId);
 
             return services;
         }

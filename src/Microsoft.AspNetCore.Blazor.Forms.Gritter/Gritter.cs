@@ -14,7 +14,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
         /// </summary>
         public static void ShowMessage( string Title, string Text)
         {
-            JSRuntime.Current.InvokeAsync<bool>("ShowGritterMessage", new object[] { Title, Text });
+            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("ShowGritterMessage", new object[] { Title, Text });
         }
     }
 }
