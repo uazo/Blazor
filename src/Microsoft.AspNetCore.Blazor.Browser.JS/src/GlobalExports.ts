@@ -1,11 +1,12 @@
-import { platform } from './Environment'
-import { registerFunction } from './Interop/RegisteredFunction';
+import { platform } from './Environment';
+import { navigateTo, internalFunctions as uriHelperInternalFunctions } from './Services/UriHelper';
+import { internalFunctions as httpInternalFunctions } from './Services/Http';
+import { attachRootComponentToElement, renderBatch } from './Rendering/Renderer';
+
 import { BlazorDOMComponent } from './Rendering/Elements/BlazorDOMComponent'
 import { BlazorDOMElement } from './Rendering/Elements/BlazorDOMElement'
 import { registerCustomTag, registerCustomDOMElement } from './Interop/RenderingFunction'
 import { raiseEvent } from './Rendering/BrowserRenderer'
-import { navigateTo } from './Services/UriHelper';
-import { invokeDotNetMethod, invokeDotNetMethodAsync } from './Interop/InvokeDotNetMethodWithJsonMarshalling';
 import { EventForDotNet } from './Rendering/EventForDotNet'
 
 if (typeof window !== 'undefined') {
@@ -13,17 +14,21 @@ if (typeof window !== 'undefined') {
   // following APIs available in global scope for invocation from JS
   window['Blazor'] = {
     platform,
-    registerFunction,
     navigateTo,
-    invokeDotNetMethod,
-    invokeDotNetMethodAsync
 
-    ,
-    raiseEvent,
+    _internal: {
+      attachRootComponentToElement,
+      renderBatch,
+      http: httpInternalFunctions,
+      uriHelper: uriHelperInternalFunctions
+		},
+
+		,
+		raiseEvent,
 		registerCustomTag,
 		registerCustomDOMElement,
 		BlazorDOMElement,
-    BlazorDOMComponent,
-    EventForDotNet
+		BlazorDOMComponent,
+		EventForDotNet
   };
 }
