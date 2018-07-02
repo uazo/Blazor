@@ -77,10 +77,11 @@ class DateTimePickerComponent extends Blazor.BlazorDOMComponent {
   }
 }
 
-Blazor.registerFunction('RegisterDateTimePickerComponentId', (id) => {
+function RegisterDateTimePickerComponentId(id) {
   Blazor.registerCustomDOMElement(id, function (CID, parent, childIndex, br) {
     return new DateTimePickerComponent(CID, parent, childIndex, br);
   });
 
   return true;
-});
+}
+window["RegisterDateTimePickerComponentId"] = RegisterDateTimePickerComponentId;

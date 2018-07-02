@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,7 +19,8 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         public static IServiceCollection AddDatePicker(this IServiceCollection services)
         {
             DateTimePickerComponentId = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(Components.DatePicker));
-            Blazor.Browser.Interop.RegisteredFunction.Invoke<bool>("RegisterDateTimePickerComponentId", DateTimePickerComponentId);
+            //JSRuntime.Current.InvokeAsync<bool>("RegisterDateTimePickerComponentId", DateTimePickerComponentId);
+            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDateTimePickerComponentId", DateTimePickerComponentId);
 
             return services;
         }

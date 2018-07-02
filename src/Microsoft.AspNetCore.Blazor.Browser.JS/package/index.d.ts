@@ -9,9 +9,6 @@ export class BlazorDOMComponent extends BlazorDOMElement {
     protected raiseEvent(eventHandlerId: number, evt: EventForDotNet<UIEventArgs>): void;
 }
 
-export function registerFunction(identifier: string, implementation: Function): void;
-export function getRegisteredFunction(identifier: string): Function;
-
 export function registerCustomTag(identifier: string, implementation: Function): void;
 export function getRegisteredCustomTag(identifier: string): Function | null;
 export function registerCustomDOMElement(identifier: number, implementation: Function): void;
@@ -109,7 +106,7 @@ export enum EditType {
     removeAttribute = 4,
     updateText = 5,
     stepIn = 6,
-    stepOut = 7,
+    stepOut = 7
 }
 export interface RenderTreeEditPointer extends Pointer {
     RenderTreeEditPointer__DO_NOT_IMPLEMENT: any;
@@ -134,7 +131,7 @@ export enum FrameType {
     attribute = 3,
     component = 4,
     region = 5,
-    elementReferenceCapture = 6,
+    elementReferenceCapture = 6
 }
 export interface RenderTreeFramePointer extends Pointer {
     RenderTreeFramePointer__DO_NOT_IMPLEMENT: any;

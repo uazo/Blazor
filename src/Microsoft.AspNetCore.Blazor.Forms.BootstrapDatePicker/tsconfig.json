@@ -10,7 +10,8 @@
 
         "baseUrl": "./",
         "paths": {
-            "@blazor": [ "..\\Microsoft.AspNetCore.Blazor.Browser.JS\\package\\index.d.ts" ]
+            "@blazor": [ "..\\Microsoft.AspNetCore.Blazor.Browser.JS\\package\\index.d.ts" ],
+            "@blazor-jsinterop": [ "..\\Microsoft.JSInterop\\JavaScriptRuntime\\dist\\Microsoft.JSInterop.d.ts" ]
         }
     },
     "exclude": [

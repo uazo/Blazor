@@ -3,14 +3,15 @@ import * as Blazor from '@blazor';
 import 'gritter';
 import '@gritterts';
 
-Blazor.registerFunction('ShowGritterMessage', (title, text) => {
+function ShowGritterMessage(title, text) {
   $.gritter.add({
     title: title,
     text: text
   });
 
   return true;
-});
+}
+window["ShowGritterMessage"] = ShowGritterMessage;
 
 $.extend($.gritter.options, {
   position: 'bottom-right', // defaults to 'top-right' but can be 'bottom-left', 'bottom-right', 'top-left', 'top-right' (added in 1.7.1)
@@ -18,3 +19,4 @@ $.extend($.gritter.options, {
   fade_out_speed: 2000, // how fast the notices fade out
   time: 6000 // hang on the screen for...
 });
+

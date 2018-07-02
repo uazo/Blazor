@@ -51,8 +51,8 @@ DtsBundlePlugin.prototype.apply = function (compiler) {
 
     dts.bundle({
       name: libraryName,
-      main: outputFolder + '/types/BlazorJSLibrary.d.ts',
-      out: '../index.d.ts',
+      main: outputFolder + '/types/Microsoft.AspNetCore.Blazor.Browser.JS/src/BlazorJSLibrary.d.ts',
+      out: path.join(__dirname, './package/index.d.ts'),
       removeSource: true,
       outputAsModuleFolder: true // to use npm in-package typings
     });

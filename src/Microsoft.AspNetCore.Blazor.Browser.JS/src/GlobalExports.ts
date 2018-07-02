@@ -23,7 +23,6 @@ if (typeof window !== 'undefined') {
       uriHelper: uriHelperInternalFunctions
 		},
 
-		,
 		raiseEvent,
 		registerCustomTag,
 		registerCustomDOMElement,

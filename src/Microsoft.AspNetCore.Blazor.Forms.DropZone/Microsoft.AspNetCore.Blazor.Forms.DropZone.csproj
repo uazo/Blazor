@@ -14,6 +14,7 @@
         <ProjectReference Include="..\Microsoft.AspNetCore.Blazor.Browser\Microsoft.AspNetCore.Blazor.Browser.csproj" />
         <ProjectReference Include="..\Microsoft.AspNetCore.Blazor.Forms\Microsoft.AspNetCore.Blazor.Forms.csproj" />
         <ProjectReference Include="..\Microsoft.AspNetCore.Blazor\Microsoft.AspNetCore.Blazor.csproj" />
+        <ProjectReference Include="..\Microsoft.JSInterop\Microsoft.JSInterop.csproj" />
     </ItemGroup>
 
     <Target Name="RunWebpack" AfterTargets="BeforeBuild">

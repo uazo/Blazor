@@ -23,6 +23,7 @@ module.exports = {
   output: { path: path.join(__dirname, '/dist'), filename: '[name].js' },
   externals: {
     '@blazor': "window['Blazor']",
+    '@blazor-jsinterop': "window['DotNet']",
     'bootstrap.v3.datetimepicker': "''",
     'jquery': "window['$']"
   }

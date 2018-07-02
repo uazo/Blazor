@@ -112,10 +112,11 @@ class DropZoneElement extends Blazor.BlazorDOMComponent {
   }
 }
 
-Blazor.registerFunction('RegisterDropZoneComponentId', (id) => {
+export function RegisterDropZoneComponentId(id) {
   Blazor.registerCustomDOMElement(id, function (CID, parent, childIndex, br) {
     return new DropZoneElement(CID, parent, childIndex, br);
   });
 
   return true;
-});
+}
+window["RegisterDropZoneComponentId"] = RegisterDropZoneComponentId;

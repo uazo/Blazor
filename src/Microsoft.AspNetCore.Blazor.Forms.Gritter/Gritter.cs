@@ -1,3 +1,4 @@
+using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Components
         /// </summary>
         public static void ShowMessage( string Title, string Text)
         {
-            Blazor.Browser.Interop.RegisteredFunction.Invoke<bool>("ShowGritterMessage", new object[] { Title, Text });
+            JSRuntime.Current.InvokeAsync<bool>("ShowGritterMessage", new object[] { Title, Text });
         }
     }
 }

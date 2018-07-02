@@ -2,9 +2,9 @@ export {
   BlazorDOMComponent
 } from './Rendering/Elements/BlazorDOMComponent'
 
-export {
-  registerFunction
-} from './Interop/RegisteredFunction';
+//export {
+//  registerFunction
+//} from './Interop/RegisteredFunction';
 
 export {
   registerCustomTag, registerCustomDOMElement

@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Linq;
 using Microsoft.AspNetCore.Blazor.Forms.Components;
+using Microsoft.JSInterop;
 
 namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 {
@@ -115,14 +116,14 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 builder.AddAttribute(sequence++, "onfileadded", args =>
                 {
                     var customArgs = args as UICustomEventArgs;
-                    var fileArgs = JsonUtil.Deserialize<Components.DropZone.FileEventArgs>((string)customArgs.Value);
+                    var fileArgs = Json.Deserialize<Components.DropZone.FileEventArgs>((string)customArgs.Value);
                     options.InvokeOnFileAdded(form, property, fileArgs);
                 });
 
                 builder.AddAttribute(sequence++, "onfileremoved", args =>
                 {
                     var customArgs = args as UICustomEventArgs;
-                    var fileArgs = JsonUtil.Deserialize<Components.DropZone.FileEventArgs>((string)customArgs.Value);
+                    var fileArgs = Json.Deserialize<Components.DropZone.FileEventArgs>((string)customArgs.Value);
                     options.InvokeOnFileRemoved(form, property, fileArgs);
                 });
 
