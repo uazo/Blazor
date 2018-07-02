@@ -8,7 +8,7 @@ export {
 
 export {
   registerCustomTag, registerCustomDOMElement
-} from './Interop/RenderingFunction';
+} from './Rendering/Elements/RenderingFunction';
 
 export {
   EventForDotNet

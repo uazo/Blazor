@@ -1,7 +1,7 @@
 import { BrowserRenderer } from '../BrowserRenderer';
-import { renderTreeFrame, RenderTreeFramePointer } from '../RenderTreeFrame';
-import { getRegisteredCustomTag } from '../../Interop/RenderingFunction';
+import { getRegisteredCustomTag } from './RenderingFunction';
 import { BlazorINPUTElement } from './BlazorINPUTElement';
+import { RenderBatch, ArraySegment, ArrayRange, RenderTreeEdit, RenderTreeFrame, EditType, FrameType, ArrayValues } from '../RenderBatch/RenderBatch';
 
 const logicalBlazorDomElementPropname = createSymbolOrFallback('_blazorDomElement');
 const logicalBlazorChildElementPropname = createSymbolOrFallback('_blazorDomChild');
@@ -133,18 +133,19 @@ export class BlazorDOMElement {
 		domTextNode.textContent = newText;
 	}
 
-	public applyAttribute(componentId: number, attributeFrame: RenderTreeFramePointer) {
+  public applyAttribute(batch: RenderBatch, componentId: number, attributeFrame: RenderTreeFrame) {
+    const frameReader = batch.frameReader;
+    const attributeName = frameReader.attributeName(attributeFrame)!;
 		//const toDomElement = this.Range.startContainer as Element;
 		//const browserRendererId = this.browserRenderer.browserRendererId;
-    const attributeName = renderTreeFrame.attributeName(attributeFrame)!;
     if (this.isDOMAttributeEvent(attributeName)) {
-      const eventHandlerId = renderTreeFrame.attributeEventHandlerId(attributeFrame);
+      const eventHandlerId = frameReader.attributeEventHandlerId(attributeFrame);
       if (this.applyEvent(attributeName, componentId, eventHandlerId) == true) {
         return;
       }
     }
 
-		const attributeValue = renderTreeFrame.attributeValue(attributeFrame);
+    const attributeValue = frameReader.attributeValue(attributeFrame);
 		if (this.isDOMAttribute(attributeName, attributeValue) == false) {
 			return; // If this DOM element type has special 'value' handling, don't also write it as an attribute
 		}

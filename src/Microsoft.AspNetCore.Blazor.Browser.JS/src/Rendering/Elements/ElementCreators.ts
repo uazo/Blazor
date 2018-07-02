@@ -3,7 +3,7 @@ import { BlazorDOMElement, getBlazorDomElement } from './BlazorDOMElement';
 import { BlazorDOMComponent } from './BlazorDOMComponent';
 import { BlazorINPUTElement } from './BlazorINPUTElement';
 
-import { getRegisteredCustomTag, getRegisteredCustomDOMElement } from '../../Interop/RenderingFunction';
+import { getRegisteredCustomTag, getRegisteredCustomDOMElement } from './RenderingFunction';
 
 export function createBlazorDOMElement(br: BrowserRenderer, stepInElement: Element): BlazorDOMElement {
 	let element = getBlazorDomElement(stepInElement);
