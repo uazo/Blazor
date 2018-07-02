@@ -27,7 +27,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
               object htmlAttributes = null,
               string Format = null)
         {
-            var property = Extensions.PropertyHelpers.GetProperty(Field);
+            var property = Extensions.PropertyHelper<T>.GetProperty(Field);
 
             System.DateTime.TryParse( model.GetValue(property)?.ToString(), out System.DateTime currentValue);
 
