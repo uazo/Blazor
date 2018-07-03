@@ -97,9 +97,15 @@ export class BrowserRenderer {
           const siblingIndex = editReader.siblingIndex(edit);
           const element = parent.getLogicalChild(childIndexAtCurrentDepth + siblingIndex) as Element;
 
-          const blazorElement = createBlazorDOMElement(this, element);
-          blazorElement.applyAttribute(batch, componentId, frame);
-          blazorElement.dispose();
+          const blazorElement = element as any as BlazorDOMElement;
+          if (blazorElement == null) {
+            const be = createBlazorDOMElement(this, element);
+            be.applyAttribute(batch, componentId, frame);
+            be.dispose();
+          }
+          else {
+            blazorElement.applyAttribute(batch, componentId, frame);
+          }
           break;
         }
         case EditType.removeAttribute: {

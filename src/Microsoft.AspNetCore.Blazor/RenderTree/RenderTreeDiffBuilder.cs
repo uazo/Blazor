@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -399,6 +399,17 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                                 ref diffContext,
                                 oldFrameIndex,
                                 newFrameIndex);
+
+                            if (oldFrame.CustomComponentType != 0)
+                            {
+                                var oldFrameAttributesEndIndexExcl = GetAttributesEndIndexExclusive(oldTree, oldFrameIndex);
+                                var newFrameAttributesEndIndexExcl = GetAttributesEndIndexExclusive(newTree, newFrameIndex);
+                                AppendAttributeDiffEntriesForRange(
+                                    ref diffContext,
+                                    oldFrameIndex, oldFrameAttributesEndIndexExcl,
+                                    newFrameIndex, newFrameAttributesEndIndexExcl);
+                            }
+
                             diffContext.SiblingIndex++;
                         }
                         else
