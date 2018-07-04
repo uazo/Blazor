@@ -97,13 +97,13 @@ export class BrowserRenderer {
           const siblingIndex = editReader.siblingIndex(edit);
           const element = parent.getLogicalChild(childIndexAtCurrentDepth + siblingIndex) as Element;
 
-          const blazorElement = element as any as BlazorDOMElement;
-          if (blazorElement == null) {
+          if (element instanceof BlazorDOMElement == false) {
             const be = createBlazorDOMElement(this, element);
             be.applyAttribute(batch, componentId, frame);
             be.dispose();
           }
           else {
+            const blazorElement = element as any as BlazorDOMElement;
             blazorElement.applyAttribute(batch, componentId, frame);
           }
           break;

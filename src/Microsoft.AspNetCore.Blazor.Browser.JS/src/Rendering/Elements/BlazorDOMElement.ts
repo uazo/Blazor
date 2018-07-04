@@ -154,10 +154,18 @@ export class BlazorDOMElement {
     this.setAttribute(attributeName, attributeValue);
   }
 
+  protected removeAttributeValue(attributeName: string) {
+  }
+
 	public removeAttribute(childIndex: number, attributeName: string) {
-		// maybe must be rewritten (never go inside for now)
-		const element = this.getLogicalChild(childIndex) as Element;
-		element.removeAttribute(attributeName);
+    const element = this.getLogicalChild(childIndex) as Element;
+    if (element instanceof BlazorDOMElement == false) {
+      element.removeAttribute(attributeName);
+    }
+    else {
+      const blazorElement = element as any as BlazorDOMElement;
+      blazorElement.removeAttributeValue(attributeName);
+    }
 	}
 
 	protected setAttribute(attributeName: string, attributeValue: string | null) {

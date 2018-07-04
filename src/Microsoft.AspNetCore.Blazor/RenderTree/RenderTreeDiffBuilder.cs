@@ -148,7 +148,8 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
         private static void AppendAttributeDiffEntriesForRange(
             ref DiffContext diffContext,
             int oldStartIndex, int oldEndIndexExcl,
-            int newStartIndex, int newEndIndexExcl)
+            int newStartIndex, int newEndIndexExcl,
+            bool isComponent = false)
         {
             // The overhead of the dictionary used by AppendAttributeDiffEntriesForRangeSlow is
             // significant, so we want to try and do a merge-join if possible, but fall back to
@@ -177,7 +178,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                     string.Equals(oldAttributeName, newAttributeName, StringComparison.Ordinal))
                 {
                     // These two attributes have the same sequence and name. Keep merging.
-                    AppendDiffEntriesForAttributeFrame(ref diffContext, oldStartIndex, newStartIndex);
+                    AppendDiffEntriesForAttributeFrame(ref diffContext, oldStartIndex, newStartIndex, isComponent);
 
                     oldStartIndex++;
                     newStartIndex++;
@@ -407,7 +408,8 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                                 AppendAttributeDiffEntriesForRange(
                                     ref diffContext,
                                     oldFrameIndex, oldFrameAttributesEndIndexExcl,
-                                    newFrameIndex, newFrameAttributesEndIndexExcl);
+                                    newFrameIndex, newFrameAttributesEndIndexExcl,
+                                    true);
                             }
 
                             diffContext.SiblingIndex++;
@@ -443,7 +445,8 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
         private static void AppendDiffEntriesForAttributeFrame(
             ref DiffContext diffContext,
             int oldFrameIndex,
-            int newFrameIndex)
+            int newFrameIndex,
+            bool isComponent = false)
         {
             var oldTree = diffContext.OldTree;
             var newTree = diffContext.NewTree;
@@ -460,7 +463,13 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                 }
                 InitializeNewAttributeFrame(ref diffContext, ref newFrame);
                 var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
-                diffContext.Edits.Append(RenderTreeEdit.SetAttribute(diffContext.SiblingIndex, referenceFrameIndex));
+                if (isComponent && newFrame.AttributeValue is bool && (bool)newFrame.AttributeValue == false)
+                {
+                    // only if is component, we need to tell component to remove the attribute
+                    diffContext.Edits.Append(RenderTreeEdit.RemoveAttribute(diffContext.SiblingIndex, newFrame.AttributeName));
+                }
+                else
+                    diffContext.Edits.Append(RenderTreeEdit.SetAttribute(diffContext.SiblingIndex, referenceFrameIndex));
             }
             else if (oldFrame.AttributeEventHandlerId > 0)
             {

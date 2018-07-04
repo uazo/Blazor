@@ -30,7 +30,7 @@ export class BrowserRenderer {
     readonly browserRendererId: number;
     constructor(rendererId: number);
     attachRootComponentToElement(componentId: number, element: Element): void;
-    updateComponent(componentId: number, edits: System_Array<RenderTreeEditPointer>, editsOffset: number, editsLength: number, referenceFrames: System_Array<RenderTreeFramePointer>): void;
+    updateComponent(batch: RenderBatch, componentId: number, edits: ArraySegment<RenderTreeEdit>, referenceFrames: ArrayValues<RenderTreeFrame>): void;
     disposeComponent(componentId: number): void;
     disposeEventHandler(eventHandlerId: number): void;
 }
@@ -46,7 +46,8 @@ export class BlazorDOMElement {
     insertNodeIntoDOM(node: Node, childIndex: number): void;
     removeFromDom(childIndex?: number | null): void;
     updateText(childIndex: number, newText: string | null): void;
-    applyAttribute(componentId: number, attributeFrame: RenderTreeFramePointer): void;
+    applyAttribute(batch: RenderBatch, componentId: number, attributeFrame: RenderTreeFrame): void;
+    protected removeAttributeValue(attributeName: string): void;
     removeAttribute(childIndex: number, attributeName: string): void;
     protected setAttribute(attributeName: string, attributeValue: string | null): void;
     protected isDOMAttribute(attributeName: string, value: string | null): boolean;
@@ -58,47 +59,71 @@ export class BlazorDOMElement {
 }
 export function getBlazorDomElement(container: Node): any;
 
-export interface Platform {
-    start(loadAssemblyUrls: string[]): Promise<void>;
-    callEntryPoint(assemblyName: string, entrypointMethod: string, args: (System_Object | null)[]): any;
-    findMethod(assemblyName: string, namespace: string, className: string, methodName: string): MethodHandle;
-    callMethod(method: MethodHandle, target: System_Object | null, args: (System_Object | null)[]): System_Object;
-    toJavaScriptString(dotNetString: System_String): string;
-    toDotNetString(javaScriptString: string): System_String;
-    toUint8Array(array: System_Array<any>): Uint8Array;
-    getArrayLength(array: System_Array<any>): number;
-    getArrayEntryPtr<TPtr extends Pointer>(array: System_Array<TPtr>, index: number, itemSize: number): TPtr;
-    getObjectFieldsBaseAddress(referenceTypedObject: System_Object): Pointer;
-    readInt32Field(baseAddress: Pointer, fieldOffset?: number): number;
-    readInt16Field(baseAddress: Pointer, fieldOffset?: number): number;
-    readFloatField(baseAddress: Pointer, fieldOffset?: number): number;
-    readObjectField<T extends System_Object>(baseAddress: Pointer, fieldOffset?: number): T;
-    readStringField(baseAddress: Pointer, fieldOffset?: number): string | null;
-    readStructField<T extends Pointer>(baseAddress: Pointer, fieldOffset?: number): T;
+export interface RenderBatch {
+    updatedComponents(): ArrayRange<RenderTreeDiff>;
+    referenceFrames(): ArrayRange<RenderTreeFrame>;
+    disposedComponentIds(): ArrayRange<number>;
+    disposedEventHandlerIds(): ArrayRange<number>;
+    updatedComponentsEntry(values: ArrayValues<RenderTreeDiff>, index: number): RenderTreeDiff;
+    referenceFramesEntry(values: ArrayValues<RenderTreeFrame>, index: number): RenderTreeFrame;
+    disposedComponentIdsEntry(values: ArrayValues<number>, index: number): number;
+    disposedEventHandlerIdsEntry(values: ArrayValues<number>, index: number): number;
+    diffReader: RenderTreeDiffReader;
+    editReader: RenderTreeEditReader;
+    frameReader: RenderTreeFrameReader;
+    arrayRangeReader: ArrayRangeReader;
+    arraySegmentReader: ArraySegmentReader;
 }
-export interface MethodHandle {
-    MethodHandle__DO_NOT_IMPLEMENT: any;
+export interface ArrayRangeReader {
+    count<T>(arrayRange: ArrayRange<T>): number;
+    values<T>(arrayRange: ArrayRange<T>): ArrayValues<T>;
 }
-export interface System_Object {
-    System_Object__DO_NOT_IMPLEMENT: any;
+export interface ArraySegmentReader {
+    offset<T>(arraySegment: ArraySegment<T>): number;
+    count<T>(arraySegment: ArraySegment<T>): number;
+    values<T>(arraySegment: ArraySegment<T>): ArrayValues<T>;
 }
-export interface System_String extends System_Object {
-    System_String__DO_NOT_IMPLEMENT: any;
+export interface RenderTreeDiffReader {
+    componentId(diff: RenderTreeDiff): number;
+    edits(diff: RenderTreeDiff): ArraySegment<RenderTreeEdit>;
+    editsEntry(values: ArrayValues<RenderTreeEdit>, index: number): RenderTreeEdit;
 }
-export interface System_Array<T> extends System_Object {
-    System_Array__DO_NOT_IMPLEMENT: any;
+export interface RenderTreeEditReader {
+    editType(edit: RenderTreeEdit): EditType;
+    siblingIndex(edit: RenderTreeEdit): number;
+    newTreeIndex(edit: RenderTreeEdit): number;
+    removedAttributeName(edit: RenderTreeEdit): string | null;
 }
-export interface Pointer {
-    Pointer__DO_NOT_IMPLEMENT: any;
+export interface RenderTreeFrameReader {
+    frameType(frame: RenderTreeFrame): FrameType;
+    subtreeLength(frame: RenderTreeFrame): number;
+    elementReferenceCaptureId(frame: RenderTreeFrame): number;
+    componentId(frame: RenderTreeFrame): number;
+    elementName(frame: RenderTreeFrame): string | null;
+    textContent(frame: RenderTreeFrame): string | null;
+    attributeName(frame: RenderTreeFrame): string | null;
+    attributeValue(frame: RenderTreeFrame): string | null;
+    attributeEventHandlerId(frame: RenderTreeFrame): number;
+    customComponentType(frame: RenderTreeFrame): number;
 }
-
-export function getRenderTreeEditPtr(renderTreeEdits: System_Array<RenderTreeEditPointer>, index: number): RenderTreeEditPointer;
-export const renderTreeEdit: {
-    type: (edit: RenderTreeEditPointer) => EditType;
-    siblingIndex: (edit: RenderTreeEditPointer) => number;
-    newTreeIndex: (edit: RenderTreeEditPointer) => number;
-    removedAttributeName: (edit: RenderTreeEditPointer) => string | null;
-};
+export interface ArrayRange<T> {
+    ArrayRange__DO_NOT_IMPLEMENT: any;
+}
+export interface ArraySegment<T> {
+    ArraySegment__DO_NOT_IMPLEMENT: any;
+}
+export interface ArrayValues<T> {
+    ArrayValues__DO_NOT_IMPLEMENT: any;
+}
+export interface RenderTreeDiff {
+    RenderTreeDiff__DO_NOT_IMPLEMENT: any;
+}
+export interface RenderTreeFrame {
+    RenderTreeFrame__DO_NOT_IMPLEMENT: any;
+}
+export interface RenderTreeEdit {
+    RenderTreeEdit__DO_NOT_IMPLEMENT: any;
+}
 export enum EditType {
     prependFrame = 1,
     removeFrame = 2,
@@ -108,23 +133,6 @@ export enum EditType {
     stepIn = 6,
     stepOut = 7
 }
-export interface RenderTreeEditPointer extends Pointer {
-    RenderTreeEditPointer__DO_NOT_IMPLEMENT: any;
-}
-
-export function getTreeFramePtr(renderTreeEntries: System_Array<RenderTreeFramePointer>, index: number): RenderTreeFramePointer;
-export const renderTreeFrame: {
-    frameType: (frame: RenderTreeFramePointer) => FrameType;
-    subtreeLength: (frame: RenderTreeFramePointer) => FrameType;
-    elementReferenceCaptureId: (frame: RenderTreeFramePointer) => number;
-    componentId: (frame: RenderTreeFramePointer) => number;
-    elementName: (frame: RenderTreeFramePointer) => string | null;
-    textContent: (frame: RenderTreeFramePointer) => string | null;
-    attributeName: (frame: RenderTreeFramePointer) => string | null;
-    attributeValue: (frame: RenderTreeFramePointer) => string | null;
-    attributeEventHandlerId: (frame: RenderTreeFramePointer) => number;
-    customComponentType: (frame: RenderTreeFramePointer) => number;
-};
 export enum FrameType {
     element = 1,
     text = 2,
@@ -132,9 +140,6 @@ export enum FrameType {
     component = 4,
     region = 5,
     elementReferenceCapture = 6
-}
-export interface RenderTreeFramePointer extends Pointer {
-    RenderTreeFramePointer__DO_NOT_IMPLEMENT: any;
 }
 
 export interface OnEventCallback {
