@@ -1,0 +1,32 @@
+@functions
+{
+  [Parameter]
+  public RenderFragment Template { get; set; }
+
+  [Parameter]
+  public RenderFragment<int> TemplateWithInt { get; set; }
+
+  [Parameter]
+  public RenderFragment<TestObject> TemplateWithObject { get; set; }
+
+  public class TestObject
+  {
+      public string PropString { get; set; } = string.Empty;
+      public int PropInt { get; set; }
+  }
+
+  private TestObject testobject = new TestObject();
+
+  void ClickMe()
+  {
+      this.testobject.PropInt++;
+      this.testobject.PropString += "Clicked! ";
+  }
+}
+
+<div>
+    <div><button onclick="@ClickMe">Click me</button></div>
+    <div>Simple Template: @Template</div>
+    <div>Template with parameter (int): @((RenderFragment)(x => TemplateWithInt(x, testobject.PropInt)))</div>
+    <div>Template with object: @((RenderFragment)(x => TemplateWithObject(x, testobject)))</div>
+</div>
