@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
         public override IntermediateNodeWriter CreateNodeWriter()
         {
-            return _options.DesignTime ? (BlazorNodeWriter)new BlazorDesignTimeNodeWriter() : new BlazorRuntimeNodeWriter();
+            return _options.DesignTime ? (BlazorNodeWriter)new Hacked.BlazorDesignTimeNodeWriterWithTemplate() : new Hacked.BlazorRuntimeNodeWriterWithTemplate();
         }
 
         public override TExtension GetExtension<TExtension>()

@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Blazor.Shared;
@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.CodeGeneration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.AspNetCore.Blazor.Razor
 {
@@ -29,7 +30,17 @@ namespace Microsoft.AspNetCore.Blazor.Razor
         public void CloseScope(CodeRenderingContext context)
         {
             var currentScope = _stack.Pop();
+            CloseLambda(currentScope, context);
+        }
 
+        public void CloseLambda(CodeRenderingContext context)
+        {
+            var currentScope = _stack.Peek();
+            CloseLambda(currentScope, context);
+        }
+
+        private void CloseLambda(ScopeEntry currentScope, CodeRenderingContext context)
+        {
             // When closing the scope for a component with children, it's time to close the lambda
             if (currentScope.LambdaScope != null)
             {
@@ -40,21 +51,36 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             }
         }
 
-        public void IncrementCurrentScopeChildCount(CodeRenderingContext context)
+        public void IncrementCurrentScopeChildCount(CodeRenderingContext context,
+                                                    string FullTypeName = null,
+                                                    string AttributeName = null,
+                                                    string[] ParametersName = null)
         {
             if (_stack.Count > 0)
             {
                 var currentScope = _stack.Peek();
 
-                if (currentScope.IsComponent && currentScope.ChildCount == 0)
+                if (currentScope.IsComponent && (currentScope.ChildCount == 0 || AttributeName != null))
                 {
                     // When we're about to insert the first child into a component,
                     // it's time to open a new lambda
                     var blazorNodeWriter = (BlazorNodeWriter)context.NodeWriter;
-                    blazorNodeWriter.BeginWriteAttribute(context.CodeWriter, BlazorApi.RenderTreeBuilder.ChildContent);
+                    blazorNodeWriter.BeginWriteAttribute(
+                        context.CodeWriter,
+                        AttributeName == null ? BlazorApi.RenderTreeBuilder.ChildContent : AttributeName);
                     OffsetBuilderVarNumber(1);
-                    context.CodeWriter.Write($"({BlazorApi.RenderFragment.FullTypeName})(");
-                    currentScope.LambdaScope = context.CodeWriter.BuildLambda(BuilderVarName);
+                    context.CodeWriter.Write($"({(FullTypeName == null ? BlazorApi.RenderFragment.FullTypeName : FullTypeName)})(");
+
+                    var names = new string[] { BuilderVarName };
+                    if (ParametersName != null)
+                    {
+                        for( int t=0; t<ParametersName.Length; t++)
+                        {
+                            ParametersName[t] = ParametersName[t].Replace("{builder}", BuilderVarName);
+                        }
+                        names = names.Concat(ParametersName).ToArray();
+                    }
+                    currentScope.LambdaScope = context.CodeWriter.BuildLambda(names);
                 }
 
                 currentScope.ChildCount++;
