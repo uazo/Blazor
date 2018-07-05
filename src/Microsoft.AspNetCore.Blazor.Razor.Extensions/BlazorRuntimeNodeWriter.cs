@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -19,8 +19,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
     internal class BlazorRuntimeNodeWriter : BlazorNodeWriter
     {
         private readonly List<IntermediateToken> _currentAttributeValues = new List<IntermediateToken>();
-        private readonly ScopeStack _scopeStack = new ScopeStack();
-        private int _sourceSequence = 0;
+        protected readonly ScopeStack _scopeStack = new ScopeStack();
+        protected int _sourceSequence = 0;
 
         public override void WriteCSharpCode(CodeRenderingContext context, CSharpCodeIntermediateNode node)
         {
