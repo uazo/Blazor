@@ -18,6 +18,17 @@ namespace StandaloneApp
                 configure.AddGritter();
                 configure.AddDropZone();
                 // Add any custom services here
+
+                int id;
+
+                id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DxButton));
+                ((Microsoft.JSInterop.IJSInProcessRuntime)Microsoft.JSInterop.JSRuntime.Current).Invoke<bool>("RegisterDXButtonComponentId", id);
+
+                id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DxCalendar));
+                ((Microsoft.JSInterop.IJSInProcessRuntime)Microsoft.JSInterop.JSRuntime.Current).Invoke<bool>("RegisterDXCalendarComponentId", id);
+
+                id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DxColorBox));
+                ((Microsoft.JSInterop.IJSInProcessRuntime)Microsoft.JSInterop.JSRuntime.Current).Invoke<bool>("RegisterDXColorBoxComponentId", id);
             });
 
             new BrowserRenderer(serviceProvider).AddComponent<App>("app");

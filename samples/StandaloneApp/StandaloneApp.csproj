@@ -17,6 +17,12 @@
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Browser\Microsoft.AspNetCore.Blazor.Browser.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Pages\devexpress\Index.cshtml">
+      <Pack>$(IncludeRazorContentInPack)</Pack>
+    </Content>
+  </ItemGroup>
+
   <!-- Local alternative to <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" /> -->
   <Import Project="..\..\src\Microsoft.AspNetCore.Blazor.Build\ReferenceFromSource.props" />
 

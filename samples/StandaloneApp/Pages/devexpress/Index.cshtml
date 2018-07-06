@@ -1,0 +1,45 @@
+@page "/dx"
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<DxButton text="@this.Text" hint="Example Hint"
+          type="@DxButton.ButtonType.success.ToString()"
+          icon="check"
+          onclick="@Clicked"></DxButton>
+
+<div>
+    <DxCalendar onValueChanged="@ValueChanged"></DxCalendar>
+</div>
+
+<div>
+    <DxColorBox onValueChanged="@ValueChanged"
+                applyButtonText="apply button"
+                disabled="@colorboxDisabled"></DxColorBox>
+    <DxButton text="Disable/Enable"
+              onclick="(x => { colorboxDisabled = !colorboxDisabled; this.StateHasChanged(); })"></DxButton>
+    <span disabled="@colorboxDisabled">
+        @colorboxDisabled
+    </span>
+</div>
+
+
+
+@functions {
+string Text = "Example Button";
+bool colorboxDisabled = true;
+
+protected void Clicked(UICustomEventArgs e)
+{
+    Text += " Clicked!";
+    Console.WriteLine($"Click! {e.Type} {e.Value}");
+    this.StateHasChanged();
+}
+
+protected void ValueChanged(UICustomEventArgs e)
+{
+    Console.WriteLine($"ValueChanged! {e.Type} {e.Value}");
+    this.StateHasChanged();
+}
+}
