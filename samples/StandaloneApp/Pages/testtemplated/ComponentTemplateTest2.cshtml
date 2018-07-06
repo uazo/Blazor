@@ -1,3 +1,5 @@
+@implements ITemplatedComponent
+
 <div><button onclick="@ClickMe">Click me</button></div>
 
 <div>
@@ -9,33 +11,33 @@
 
 @functions
 {
-  [Parameter]
-  public RenderFragment<TestObject> RowTemplate { get; set; }
+[Parameter]
+public RenderFragment<TestObject> RowTemplate { get; set; }
 
-  public class TestObject
-  {
-      public string PropString { get; set; } = string.Empty;
-      public int PropInt { get; set; }
-  }
+public class TestObject
+{
+    public string PropString { get; set; } = string.Empty;
+    public int PropInt { get; set; }
+}
 
-  private List<TestObject> list = new List<TestObject>();
+private List<TestObject> list = new List<TestObject>();
 
-  protected override void OnInit()
-  {
-      for (int t = 0; t != 10; t++)
-      {
-          list.Add(new TestObject()
-          {
-              PropInt = t,
-              PropString = $"Value {t}"
-          });
-      }
-      base.OnInit();
-  }
+protected override void OnInit()
+{
+    for (int t = 0; t != 10; t++)
+    {
+        list.Add(new TestObject()
+        {
+            PropInt = t,
+            PropString = $"Value {t}"
+        });
+    }
+    base.OnInit();
+}
 
-  void ClickMe()
-  {
-      int rnd = new Random().Next(list.Count());
-      list.ElementAt(rnd).PropInt++;
-  }
+void ClickMe()
+{
+    int rnd = new Random().Next(list.Count());
+    list.ElementAt(rnd).PropInt++;
+}
 }

@@ -11,14 +11,15 @@ using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.CodeGeneration;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 
-namespace Microsoft.AspNetCore.Blazor.Razor.Hacked
+namespace Microsoft.AspNetCore.Blazor.Razor.TemplatedComponents
 {
-    internal class BlazorRuntimeNodeWriterWithTemplate: BlazorRuntimeNodeWriter
+    internal class BlazorDesignTimeNodeWriterWithTemplate : BlazorDesignTimeNodeWriter
     {
         public override void WriteComponent(CodeRenderingContext context, ComponentExtensionNode node)
         {
-            if (WriteComponentWithTemplate.WriteComponent(_scopeStack, context, node, ref _sourceSequence))
-                base.WriteComponent(context, node);
+            int _sourceSequence = 0;
+            if ( WriteComponentWithTemplate.WriteComponent(_scopeStack, context, node, ref _sourceSequence))
+                base.WriteComponent(context, node); 
         }
     }
 }

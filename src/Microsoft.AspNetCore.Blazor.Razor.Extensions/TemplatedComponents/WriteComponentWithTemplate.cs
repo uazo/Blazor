@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.CodeGeneration;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 
-namespace Microsoft.AspNetCore.Blazor.Razor.Hacked
+namespace Microsoft.AspNetCore.Blazor.Razor.TemplatedComponents
 {
     internal static class WriteComponentWithTemplate
     {
@@ -30,54 +30,16 @@ namespace Microsoft.AspNetCore.Blazor.Razor.Hacked
                 throw new ArgumentNullException(nameof(node));
             }
 
+            if (node.Component.Metadata.ContainsKey(BlazorMetadata.Component.IsTemplatedComponent) == false ||
+                node.Component.Metadata[BlazorMetadata.Component.IsTemplatedComponent] != bool.TrueString)
+                return true;
+
             if (enableLog)
             {
                 foreach (var i in node.Component.BoundAttributes)
                 {
                     context.CodeWriter.WriteLine($"// {i.Name} {i.TypeName} {i.Kind}");
                 }
-            }
-
-            bool defaultAction = true;
-            if (node.Body.Count() != 0 && // have childs 
-                node.Component.BoundAttributes.Count(x => x.Name.ToUpper() == BlazorApi.RenderTreeBuilder.ChildContent.ToUpper()) != 0 // one props is "ChildContent"
-            )
-            {
-                if (enableLog) context.CodeWriter.WriteLine($"// ChildContent found. revert to normal");
-                return defaultAction;
-            }
-            
-
-            if (node.Body.Count() != 0 && // have childs 
-                node.Component.BoundAttributes.Count(x => x.TypeName.Contains(BlazorApi.RenderFragment.FullTypeName)) != 0 // one props have "RenderFragment" in it
-                )
-            {
-                defaultAction = false;
-
-                if (enableLog) context.CodeWriter.WriteLine($"// ok found RenderFragment");
-
-                // check if EVERY node in childs are props
-                foreach (var child in node.Body)
-                {
-                    HtmlElementIntermediateNode htmlNode = child as HtmlElementIntermediateNode;
-                    if (htmlNode != null)
-                    {
-                        if (node.Component.BoundAttributes.Count(x => x.Name.ToUpper() == htmlNode.TagName.ToUpper()) == 0)
-                        {
-                            if (enableLog) context.CodeWriter.WriteLine($"// {htmlNode.TagName} is not a RenderFragment. falling back to default behaviour");
-
-                            defaultAction = true;
-                        }
-                    }
-                }
-            }
-
-            //defaultAction = false;
-
-            if (defaultAction == true)
-            {
-                if(enableLog == true) context.CodeWriter.WriteLine($"// defaultAction");
-                return true;
             }
 
             // The start tag counts as a child from a markup point of view.

@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -126,6 +126,9 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             // Components have very simple matching rules. The type name (short) matches the tag name.
             builder.TagMatchingRule(r => r.TagName = type.Name);
 
+            // List of all RenderFragment (and derived) props
+            List<string> renderFragmentPropList = new List<string>();
+
             foreach (var property in GetProperties(type, parameterSymbol, blazorComponentSymbol))
             {
                 if (property.kind == PropertyKind.Ignored)
@@ -154,7 +157,27 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                     {
                         pb.Documentation = xml;
                     }
+
+                    if( pb.TypeName.Contains(BlazorApi.RenderFragment.FullTypeName))
+                    {
+                        // is a RenderFragment
+                        renderFragmentPropList.Add(pb.Name);
+                    }
                 });
+            }
+
+            // we need to know if we want to allow only RenderFragments tags
+            // so check for ITemplateComponent interface
+            if (type.AllInterfaces != null && type.AllInterfaces.Count(x => x.ToDisplayString() == BlazorApi.ITemplatedComponent.FullTypeName) != 0)
+            {
+                builder.Metadata[BlazorMetadata.Component.IsTemplatedComponent] = bool.TrueString;
+                foreach (string child in renderFragmentPropList)
+                {
+                    builder.AllowChildTag(conf =>
+                    {
+                        conf.Name = child;
+                    });
+                }
             }
 
             var descriptor = builder.Build();
