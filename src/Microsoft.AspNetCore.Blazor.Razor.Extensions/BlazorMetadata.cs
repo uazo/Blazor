@@ -30,6 +30,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
         {
             public static readonly string DelegateSignatureKey = "Blazor.DelegateSignature";
 
+            public static readonly string WeaklyTypedKey = "Blazor.IsWeaklyTyped";
+
             public static readonly string RuntimeName = "Blazor.IComponent";
 
             public readonly static string TagHelperKind = "Blazor.Component";
