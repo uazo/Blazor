@@ -1,4 +1,4 @@
-﻿<linker>
+<linker>
 
   <!-- This file specifies which parts of the BCL or Blazor packages must not be stripped
   by the IL linker even if they are not referenced by user code. The file format is
