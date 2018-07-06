@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 
@@ -124,6 +124,52 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
             tagHelper.Metadata.TryGetValue(BlazorMetadata.EventHandler.EventArgsType, out var result);
             return result;
+        }
+
+        public static bool IsTemplatedComponentTagHelper(this TagHelperDescriptor tagHelper)
+        {
+            if (tagHelper == null)
+            {
+                throw new ArgumentNullException(nameof(tagHelper));
+            }
+
+            return
+                tagHelper.Metadata.TryGetValue(BlazorMetadata.Component.TemplatedComponent, out var kind) &&
+                string.Equals(bool.TrueString, kind);
+        }
+
+        public static bool IsTemplatedComponentPropTagHelper(this TagHelperDescriptor tagHelper)
+        {
+            if (tagHelper == null)
+            {
+                throw new ArgumentNullException(nameof(tagHelper));
+            }
+
+            return
+                tagHelper.Metadata.TryGetValue(BlazorMetadata.Component.TemplatedComponentProp, out var kind) &&
+                string.Equals(bool.TrueString, kind);
+        }
+
+        public static string GetTemplatedComponentPropNameTagHelper(this TagHelperDescriptor tagHelper)
+        {
+            if (tagHelper == null)
+            {
+                throw new ArgumentNullException(nameof(tagHelper));
+            }
+
+            tagHelper.Metadata.TryGetValue(BlazorMetadata.Component.TemplatedComponentPropName, out var kind);
+            return kind;
+        }
+
+        public static string GetTemplatedComponentPropTypeNameTagHelper(this TagHelperDescriptor tagHelper)
+        {
+            if (tagHelper == null)
+            {
+                throw new ArgumentNullException(nameof(tagHelper));
+            }
+
+            tagHelper.Metadata.TryGetValue(BlazorMetadata.Component.TemplatedComponentPropTypeName, out var kind);
+            return kind;
         }
     }
 }

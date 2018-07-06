@@ -74,10 +74,6 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                     var names = new string[] { BuilderVarName };
                     if (ParametersName != null)
                     {
-                        for( int t=0; t<ParametersName.Length; t++)
-                        {
-                            ParametersName[t] = ParametersName[t].Replace("{builder}", BuilderVarName);
-                        }
                         names = names.Concat(ParametersName).ToArray();
                     }
                     currentScope.LambdaScope = context.CodeWriter.BuildLambda(names);

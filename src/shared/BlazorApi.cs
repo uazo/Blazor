@@ -39,6 +39,8 @@ namespace Microsoft.AspNetCore.Blazor.Shared
             public static readonly string FullTypeName = "Microsoft.AspNetCore.Blazor.Components.ITemplatedComponent";
 
             public static readonly string MetadataName = FullTypeName;
+
+            public static readonly string WithParamsAttibuteName = "WithParams";
         }
 
         public static class IDictionary

@@ -36,7 +36,13 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
             public readonly static string TagHelperKind = "Blazor.Component";
 
-            public readonly static string IsTemplatedComponent = "Blazor.ITemplatedComponent";
+            public readonly static string TemplatedComponent = "Blazor.ITemplatedComponent";
+
+            public readonly static string TemplatedComponentProp = "Blazor.ITemplatedComponentProp";
+
+            public readonly static string TemplatedComponentPropName = "Blazor.ITemplatedComponentPropName";
+
+            public readonly static string TemplatedComponentPropTypeName = "Blazor.ITemplatedComponentPropTypeName";
         }
 
         public static class EventHandler

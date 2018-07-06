@@ -1,7 +1,8 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 
@@ -9,6 +10,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 {
     internal class ComponentLoweringPass : IntermediateNodePassBase, IRazorOptimizationPass
     {
+        static Regex rxWS = new Regex( @"^[ \t\n\r]*$");
+
         // This pass runs earlier than our other passes that 'lower' specific kinds of attributes.
         public override int Order => 0;
 
@@ -47,7 +50,15 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
                 if (count >= 1)
                 {
-                    reference.Replace(RewriteAsComponent(node, node.TagHelpers.First(t => t.IsComponentTagHelper())));
+                    var tagHelper = node.TagHelpers.First(t => t.IsComponentTagHelper());
+                    if (tagHelper.IsTemplatedComponentPropTagHelper())
+                    {
+                        reference.Replace(RewriteAsComponentTemplateProp(node, tagHelper));
+                    }
+                    else
+                    {
+                        reference.Replace(RewriteAsComponent(node, tagHelper));
+                    }
                 }
                 else
                 {
@@ -62,7 +73,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             {
                 Component = tagHelper,
                 Source = node.Source,
-                TagName = node.TagName,
+                TagName = node.TagName
             };
 
             for (var i = 0; i < node.Diagnostics.Count; i++)
@@ -70,7 +81,54 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                 result.Diagnostics.Add(node.Diagnostics[i]);
             }
 
+            // we need to reorder, first TemplateComponentPropExtensionNode then others
+            var firstChild = node.Children.FirstOrDefault();
+            if (firstChild != null)
+            {
+                var templatePropNodes = firstChild.Children.OfType<TemplateComponentPropExtensionNode>().ToList();
+                foreach (var propNode in templatePropNodes) firstChild.Children.Remove(propNode);
+                foreach (var propNode in templatePropNodes)
+                    firstChild.Children.Insert(firstChild.Children.Count, propNode); // must be the last, see ScopeStack.IncrementCurrentScopeChildCount
+
+                if (templatePropNodes.Count() != 0)
+                {
+                    // and also, remove all lines with only space, \n, \t, \r, stop first content found
+                    var htmlContent = firstChild.Children.OfType<HtmlContentIntermediateNode>().ToList();
+                    foreach (var htmlNode in htmlContent)
+                    {
+                        if( htmlNode.Children.OfType<IntermediateToken>().All(x => rxWS.Match(x.Content).Success) )
+                            firstChild.Children.Remove(htmlNode);
+                        else
+                            break;
+                    }
+                }
+            }
+
             var visitor = new ComponentRewriteVisitor(result.Children);
+            visitor.Visit(node);
+
+            return result;
+        }
+
+        private TemplateComponentPropExtensionNode RewriteAsComponentTemplateProp(TagHelperIntermediateNode node, TagHelperDescriptor tagHelper)
+        {
+            var result = new TemplateComponentPropExtensionNode()
+            {
+                Component = tagHelper,
+                Source = node.Source,
+                TagName = node.TagName,
+
+                IsTemplateProp = tagHelper.IsTemplatedComponentPropTagHelper(),
+                TemplatePropName = tagHelper.GetTemplatedComponentPropNameTagHelper(),
+                TemplatePropTypeName = tagHelper.GetTemplatedComponentPropTypeNameTagHelper()
+            };
+
+            for (var i = 0; i < node.Diagnostics.Count; i++)
+            {
+                result.Diagnostics.Add(node.Diagnostics[i]);
+            }
+
+            var visitor = new TemplateComponentRewriteVisitor(result, result.Children);
             visitor.Visit(node);
 
             return result;
@@ -177,6 +235,24 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             public override void VisitDefault(IntermediateNode node)
             {
                 _children.Add(node);
+            }
+        }
+
+        private class TemplateComponentRewriteVisitor : ComponentRewriteVisitor
+        {
+            private TemplateComponentPropExtensionNode _component;
+
+            public TemplateComponentRewriteVisitor(TemplateComponentPropExtensionNode component, IntermediateNodeCollection children) : base(children)
+            {
+                _component = component;
+            }
+
+            public override void VisitTagHelperProperty(TagHelperPropertyIntermediateNode node)
+            {
+                if( node.AttributeName == Shared.BlazorApi.ITemplatedComponent.WithParamsAttibuteName )
+                {
+                    _component.TemplatePropArgs = node.FindDescendantNodes<IntermediateToken>()?.FirstOrDefault()?.Content;
+                }
             }
         }
 

@@ -16,7 +16,26 @@ namespace Microsoft.AspNetCore.Blazor
     /// </summary>
     public delegate void RenderFragment<X>(RenderTreeBuilder builder, X parameter1);
 
+    ///// <summary>
+    ///// </summary>
+    //public delegate void RenderFragment<X,Y>(RenderTreeBuilder builder, X parameter1, Y parameter2);
+
     /// <summary>
     /// </summary>
-    public delegate void RenderFragment<X,Y>(RenderTreeBuilder builder, X parameter1, Y parameter2);
+    public static class TemplatedComponentExtensions
+    {
+        /// <summary>
+        /// </summary>
+        public static RenderFragment RenderFragment<X>(this Components.BlazorComponent component, RenderFragment<X> fragment, X value)
+        {
+            return (RenderFragment)(builder => fragment?.Invoke(builder, value));
+        }
+
+        ///// <summary>
+        ///// </summary>
+        //public static RenderFragment RenderFragment<X,Y>(this Components.BlazorComponent component, RenderFragment<X,Y> fragment, X value1, Y value2)
+        //{
+        //    return (RenderFragment)(builder => fragment?.Invoke(builder, value1, value2));
+        //}
+    }
 }

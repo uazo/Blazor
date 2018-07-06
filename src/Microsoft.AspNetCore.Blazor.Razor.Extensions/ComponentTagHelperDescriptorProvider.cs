@@ -24,6 +24,9 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             typeof(CSharpCompilationOptions)
                 .GetMethod("WithMetadataImportOptions", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
+        private static System.Text.RegularExpressions.Regex checkFragmentIsGeneric = new System.Text.RegularExpressions.Regex($"{BlazorApi.RenderFragment.FullTypeName}<(.*)>");
+
+
         public bool IncludeDocumentation { get; set; }
 
         public int Order { get; set; }
@@ -84,7 +87,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             for (var i = 0; i < types.Count; i++)
             {
                 var type = types[i];
-                context.Results.Add(CreateDescriptor(type, parameterSymbol, blazorComponentSymbol));
+                foreach( var tagHelpers in CreateDescriptor(type, parameterSymbol, blazorComponentSymbol))
+                    context.Results.Add(tagHelpers);
             }
         }
 
@@ -95,7 +99,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             return compilation.WithOptions(newCompilationOptions);
         }
 
-        private TagHelperDescriptor CreateDescriptor(INamedTypeSymbol type, INamedTypeSymbol parameterSymbol, INamedTypeSymbol blazorComponentSymbol)
+        private List<TagHelperDescriptor> CreateDescriptor(INamedTypeSymbol type, INamedTypeSymbol parameterSymbol, INamedTypeSymbol blazorComponentSymbol)
         {
             if (type == null)
             {
@@ -127,7 +131,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             builder.TagMatchingRule(r => r.TagName = type.Name);
 
             // List of all RenderFragment (and derived) props
-            List<string> renderFragmentPropList = new List<string>();
+            List<TemplatePropDescriptor> renderFragmentPropList = new List<TemplatePropDescriptor>();
 
             foreach (var property in GetProperties(type, parameterSymbol, blazorComponentSymbol))
             {
@@ -161,28 +165,69 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                     if( pb.TypeName.Contains(BlazorApi.RenderFragment.FullTypeName))
                     {
                         // is a RenderFragment
-                        renderFragmentPropList.Add(pb.Name);
+                        renderFragmentPropList.Add(new TemplatePropDescriptor() {
+                            Name = pb.Name,
+                            FullType = pb.TypeName
+                        });
                     }
                 });
             }
 
+            List<TagHelperDescriptor> tagHelpers = new List<TagHelperDescriptor>();
+
             // we need to know if we want to allow only RenderFragments tags
             // so check for ITemplateComponent interface
-            if (type.AllInterfaces != null && type.AllInterfaces.Count(x => x.ToDisplayString() == BlazorApi.ITemplatedComponent.FullTypeName) != 0)
+            if (renderFragmentPropList.Count() != 0) 
             {
-                builder.Metadata[BlazorMetadata.Component.IsTemplatedComponent] = bool.TrueString;
-                foreach (string child in renderFragmentPropList)
+                // mark tagHelper as templated component
+                builder.Metadata[BlazorMetadata.Component.TemplatedComponent] = bool.TrueString;
+
+                // create sub tags for all template props
+                foreach (var propDescriptor in renderFragmentPropList)
                 {
-                    builder.AllowChildTag(conf =>
+                    if (propDescriptor.Name == BlazorApi.RenderTreeBuilder.ChildContent)
+                        continue; // skip "ChildContent" property
+
+                    var templateName = $"{type.Name}.{propDescriptor.Name}";
+
+                    // we allow all childs tag
+                    //builder.AllowChildTag(conf => conf.Name = templateName);
+
+                    // create attribute tag helper
+                    var templateTypeName = $"{typeName}.{propDescriptor.Name}";
+                    var builderTagHelperTemplate = TagHelperDescriptorBuilder.Create(BlazorMetadata.Component.TagHelperKind, templateTypeName, assemblyName);
+
+                    builderTagHelperTemplate.SetTypeName(templateTypeName);
+                    builderTagHelperTemplate.Metadata[TagHelperMetadata.Runtime.Name] = BlazorMetadata.Component.RuntimeName;
+
+                    builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentProp] = bool.TrueString;
+                    builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentPropName] = propDescriptor.Name;
+                    builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentPropTypeName] = propDescriptor.FullType;
+
+                    var isGeneric = checkFragmentIsGeneric.Match(propDescriptor.FullType);
+                    if( isGeneric.Success)
                     {
-                        conf.Name = child;
+                        builderTagHelperTemplate.BindAttribute(pb =>
+                        {
+                            pb.Name = BlazorApi.ITemplatedComponent.WithParamsAttibuteName;
+                            pb.TypeName = "System.String";
+                            pb.SetPropertyName(pb.Name);
+                        });
+                    }
+
+                    builderTagHelperTemplate.TagMatchingRule(r =>
+                    {
+                        r.TagName = templateName;
+                        r.ParentTag = type.Name; // Allow for this parent
                     });
+                    tagHelpers.Add(builderTagHelperTemplate.Build());
                 }
             }
 
             var descriptor = builder.Build();
+            tagHelpers.Add(descriptor);
 
-            return descriptor;
+            return tagHelpers;
         }
 
         // Does a walk up the inheritance chain to determine the set of parameters by using
@@ -324,6 +369,12 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                     !symbol.IsGenericType &&
                     symbol.AllInterfaces.Contains(_interface);
             }
+        }
+
+        private class TemplatePropDescriptor
+        {
+            internal string Name { get; set; }
+            internal string FullType { get; set; }
         }
     }
 }

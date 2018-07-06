@@ -1,5 +1,3 @@
-@implements ITemplatedComponent
-
 @functions
 {
   [Parameter]
@@ -11,6 +9,9 @@
   [Parameter]
   public RenderFragment<TestObject> TemplateWithObject { get; set; }
 
+  [Parameter]
+  public RenderFragment ChildContent { get; set; }
+ 
   public class TestObject
   {
       public string PropString { get; set; } = string.Empty;
@@ -27,6 +28,8 @@
 }
 
 <div>
+    <div>@ChildContent</div>
+    <div>--- templates ---</div>
     <div><button onclick="@ClickMe">Click me</button></div>
     <div>Simple Template: @Template</div>
     <div>Template with parameter (int): @this.RenderFragment(TemplateWithInt, testobject.PropInt)</div>
