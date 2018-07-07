@@ -453,7 +453,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             }
         }
 
-        public override void WriteTemplateComponentProp(CodeRenderingContext context, TemplateComponentPropExtensionNode node)
+        public override void WriteTemplateComponentAttribute(CodeRenderingContext context, TemplateComponentAttributeExtensionNode node)
         {
             if (context == null)
             {

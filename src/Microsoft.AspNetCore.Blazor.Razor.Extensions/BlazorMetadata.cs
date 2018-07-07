@@ -40,6 +40,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
             public readonly static string TemplatedComponentProp = "Blazor.ITemplatedComponentProp";
 
+            public readonly static string TemplatedComponentPropWithGenerics = "Blazor.ITemplatedComponentPropWithGenerics";
+
             public readonly static string TemplatedComponentPropName = "Blazor.ITemplatedComponentPropName";
 
             public readonly static string TemplatedComponentPropTypeName = "Blazor.ITemplatedComponentPropTypeName";

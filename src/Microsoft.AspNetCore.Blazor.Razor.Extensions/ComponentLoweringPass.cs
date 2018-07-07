@@ -82,10 +82,27 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             }
 
             // we need to reorder, first TemplateComponentPropExtensionNode then others
+            //
+            // assume we have
+            //  1: <ComponentTemplateTest>
+            //  2:   <ComponentTemplateTest.Template>
+            //  3:       test simple template
+            //  4:   </ComponentTemplateTest.Template>
+            //  5:
+            //  6:   <ComponentTemplateTest.TemplateWithInt WithParams="param1">
+            //  7:       @param1
+            //  8:   </ComponentTemplateTest.TemplateWithInt>
+            //  9:
+            // 10:   <div>this is childcontent (1)</div>
+            // 11:   <div>this is childcontent (2)</div>
+            // 12: </ComponentTemplateTest>
+            //
+            // we need to move lines 10,11 on top of Children collection,
+            // cause ScopeStack.IncrementCurrentScopeChildCount currently need it on top
             var firstChild = node.Children.FirstOrDefault();
             if (firstChild != null)
             {
-                var templatePropNodes = firstChild.Children.OfType<TemplateComponentPropExtensionNode>().ToList();
+                var templatePropNodes = firstChild.Children.OfType<TemplateComponentAttributeExtensionNode>().ToList();
                 foreach (var propNode in templatePropNodes) firstChild.Children.Remove(propNode);
                 foreach (var propNode in templatePropNodes)
                     firstChild.Children.Insert(firstChild.Children.Count, propNode); // must be the last, see ScopeStack.IncrementCurrentScopeChildCount
@@ -93,6 +110,9 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                 if (templatePropNodes.Count() != 0)
                 {
                     // and also, remove all lines with only space, \n, \t, \r, stop first content found
+                    // (lines 5 and 9 on the example above will be removed)
+                    // cause if a BlazorComponent doesn't have ChildContent property we don't want to add the attribute
+                    // but if a line contains others values, we need to provide it (so they will not be removed)
                     var htmlContent = firstChild.Children.OfType<HtmlContentIntermediateNode>().ToList();
                     foreach (var htmlNode in htmlContent)
                     {
@@ -100,6 +120,17 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                             firstChild.Children.Remove(htmlNode);
                         else
                             break;
+                    }
+
+                    foreach( var propNode in templatePropNodes)
+                    {
+                        if(templatePropNodes.Count(x=>x.TemplatePropName == propNode.TemplatePropName) >1 )
+                        {
+                            // only one properties!
+                            propNode.Diagnostics.Add(BlazorDiagnosticFactory.CreateRenderFragmentAttribute_Duplicates(
+                                propNode.Source,
+                                propNode.TemplatePropName));
+                        }
                     }
                 }
             }
@@ -110,15 +141,14 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             return result;
         }
 
-        private TemplateComponentPropExtensionNode RewriteAsComponentTemplateProp(TagHelperIntermediateNode node, TagHelperDescriptor tagHelper)
+        private TemplateComponentAttributeExtensionNode RewriteAsComponentTemplateProp(TagHelperIntermediateNode node, TagHelperDescriptor tagHelper)
         {
-            var result = new TemplateComponentPropExtensionNode()
+            var result = new TemplateComponentAttributeExtensionNode()
             {
                 Component = tagHelper,
                 Source = node.Source,
                 TagName = node.TagName,
 
-                IsTemplateProp = tagHelper.IsTemplatedComponentPropTagHelper(),
                 TemplatePropName = tagHelper.GetTemplatedComponentPropNameTagHelper(),
                 TemplatePropTypeName = tagHelper.GetTemplatedComponentPropTypeNameTagHelper()
             };
@@ -130,6 +160,14 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
             var visitor = new TemplateComponentRewriteVisitor(result, result.Children);
             visitor.Visit(node);
+
+            if (tagHelper.IsTemplatedComponentPropWithGenericsTagHelper() && string.IsNullOrEmpty(result.TemplatePropArgs))
+            {
+                // WithParams empty!
+                result.Diagnostics.Add(BlazorDiagnosticFactory.CreateWithParamsAttribute_MustDefined(
+                    result.Source,
+                    result.TemplatePropName));
+            }
 
             return result;
         }
@@ -240,9 +278,9 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
         private class TemplateComponentRewriteVisitor : ComponentRewriteVisitor
         {
-            private TemplateComponentPropExtensionNode _component;
+            private TemplateComponentAttributeExtensionNode _component;
 
-            public TemplateComponentRewriteVisitor(TemplateComponentPropExtensionNode component, IntermediateNodeCollection children) : base(children)
+            public TemplateComponentRewriteVisitor(TemplateComponentAttributeExtensionNode component, IntermediateNodeCollection children) : base(children)
             {
                 _component = component;
             }

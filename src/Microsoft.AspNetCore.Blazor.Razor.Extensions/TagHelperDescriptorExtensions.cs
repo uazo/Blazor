@@ -150,6 +150,18 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                 string.Equals(bool.TrueString, kind);
         }
 
+        public static bool IsTemplatedComponentPropWithGenericsTagHelper(this TagHelperDescriptor tagHelper)
+        {
+            if (tagHelper == null)
+            {
+                throw new ArgumentNullException(nameof(tagHelper));
+            }
+
+            return
+                tagHelper.Metadata.TryGetValue(BlazorMetadata.Component.TemplatedComponentPropWithGenerics, out var kind) &&
+                string.Equals(bool.TrueString, kind);
+        }
+
         public static string GetTemplatedComponentPropNameTagHelper(this TagHelperDescriptor tagHelper)
         {
             if (tagHelper == null)

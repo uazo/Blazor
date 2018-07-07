@@ -32,12 +32,12 @@
     <div>--- templates ---</div>
     <div><button onclick="@ClickMe">Click me</button></div>
     <div>Simple Template: @Template</div>
-    <div>Template with parameter (int): @this.RenderFragment(TemplateWithInt, testobject.PropInt)</div>
+    <div>Template with parameter (int): @TemplateWithInt?.Render(testobject.PropInt)</div>
 
     @*
       This syntax works
       @((RenderFragment)((x) => TemplateWithInt(x, testobject.PropInt)))
     *@
 
-    <div>Template with object: @this.RenderFragment(TemplateWithObject, testobject)</div>
+    <div>Template with object: @TemplateWithObject?.Render(testobject)</div>
 </div>

@@ -24,7 +24,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             typeof(CSharpCompilationOptions)
                 .GetMethod("WithMetadataImportOptions", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private static System.Text.RegularExpressions.Regex checkFragmentIsGeneric = new System.Text.RegularExpressions.Regex($"{BlazorApi.RenderFragment.FullTypeName}<(.*)>");
+        private static readonly System.Text.RegularExpressions.Regex RegexCheckFragmentIsGeneric =
+            new System.Text.RegularExpressions.Regex($"{BlazorApi.RenderFragment.FullTypeName}<(.*)>");
 
 
         public bool IncludeDocumentation { get; set; }
@@ -162,9 +163,9 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                         pb.Documentation = xml;
                     }
 
-                    if( pb.TypeName.Contains(BlazorApi.RenderFragment.FullTypeName))
+                    if( pb.TypeName.StartsWith(BlazorApi.RenderFragment.FullTypeName))
                     {
-                        // is a RenderFragment
+                        // is a RenderFragment prop
                         renderFragmentPropList.Add(new TemplatePropDescriptor() {
                             Name = pb.Name,
                             FullType = pb.TypeName
@@ -175,8 +176,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
             List<TagHelperDescriptor> tagHelpers = new List<TagHelperDescriptor>();
 
-            // we need to know if we want to allow only RenderFragments tags
-            // so check for ITemplateComponent interface
+            // only if for component with RenderFragments props
             if (renderFragmentPropList.Count() != 0) 
             {
                 // mark tagHelper as templated component
@@ -190,8 +190,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
                     var templateName = $"{type.Name}.{propDescriptor.Name}";
 
-                    // we allow all childs tag
-                    //builder.AllowChildTag(conf => conf.Name = templateName);
+                    // we can allow all childs tag, but not now
+                    // builder.AllowChildTag(conf => conf.Name = templateName);
 
                     // create attribute tag helper
                     var templateTypeName = $"{typeName}.{propDescriptor.Name}";
@@ -204,11 +204,19 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                     builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentPropName] = propDescriptor.Name;
                     builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentPropTypeName] = propDescriptor.FullType;
 
-                    var isGeneric = checkFragmentIsGeneric.Match(propDescriptor.FullType);
+                    var isGeneric = RegexCheckFragmentIsGeneric.Match(propDescriptor.FullType);
                     if( isGeneric.Success)
                     {
+                        builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentPropWithGenerics] = bool.TrueString;
+
+                        // NOTE: without any access to TagHelperFactsService
+                        // (exposed by Microsoft.VisualStudio.Web.Editors.Razor.TagHelpers.TagHelperScriptOrStyleTagNameService)
+                        // we can't inhibit showing BindTagHelperDescriptorProvider bind attributes for this taghelper,
+                        // so intellisense will show "WithParams" and other props!
                         builderTagHelperTemplate.BindAttribute(pb =>
                         {
+                            // doesn't not exist same of RequiredAttributeDescriptor for BoundAttributeDescriptor
+                            // we cant't require it
                             pb.Name = BlazorApi.ITemplatedComponent.WithParamsAttibuteName;
                             pb.TypeName = "System.String";
                             pb.SetPropertyName(pb.Name);
@@ -217,7 +225,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
                     builderTagHelperTemplate.TagMatchingRule(r =>
                     {
-                        r.TagName = templateName;
+                        r.TagName = templateName; // NOTE: the tag is {typeName}.{propDescriptor.Name}
+                                                  // to distinguish from others components
                         r.ParentTag = type.Name; // Allow for this parent
                     });
                     tagHelpers.Add(builderTagHelperTemplate.Build());

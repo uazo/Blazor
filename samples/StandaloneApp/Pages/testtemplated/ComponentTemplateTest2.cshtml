@@ -6,7 +6,7 @@
       int count = 0;
       foreach (var item in list)
       {
-        <div>@count: @this.RenderFragment(RowTemplate, item)</div>
+        <div>@count: @RowTemplate?.Render(item)</div>
         count++;
       }
     }

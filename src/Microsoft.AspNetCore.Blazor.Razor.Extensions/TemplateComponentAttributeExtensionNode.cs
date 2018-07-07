@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Razor.Language.Intermediate;
 
 namespace Microsoft.AspNetCore.Blazor.Razor
 {
-    internal class TemplateComponentPropExtensionNode : ExtensionIntermediateNode
+    internal class TemplateComponentAttributeExtensionNode : ExtensionIntermediateNode
     {
         public IEnumerable<ComponentAttributeExtensionNode> Attributes => Children.OfType<ComponentAttributeExtensionNode>();
 
@@ -32,7 +32,6 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
         public string TypeName => Component?.GetTypeName();
 
-        public bool IsTemplateProp { get; set; }
         public string TemplatePropName { get; set; }
         public string TemplatePropTypeName { get; set; }
         public string TemplatePropArgs { get; set; }
@@ -44,7 +43,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                 throw new ArgumentNullException(nameof(visitor));
             }
 
-            AcceptExtensionNode<TemplateComponentPropExtensionNode>(this, visitor);
+            AcceptExtensionNode<TemplateComponentAttributeExtensionNode>(this, visitor);
         }
 
         public override void WriteNode(CodeTarget target, CodeRenderingContext context)
@@ -60,7 +59,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             }
 
             var writer = (BlazorNodeWriter)context.NodeWriter;
-            writer.WriteTemplateComponentProp(context, this);
+            writer.WriteTemplateComponentAttribute(context, this);
         }
 
         private string DebuggerDisplay
@@ -68,7 +67,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             get
             {
                 var builder = new StringBuilder();
-                builder.Append("TemplateComponentPropExtensionNode: ");
+                builder.Append("TemplateComponentAttributeExtensionNode: ");
                 builder.Append("<");
                 builder.Append(TagName);
 
