@@ -4,24 +4,41 @@
 
 Welcome to your new app.
 
-<DxButton text="@this.Text" hint="Example Hint"
-          type="@DxButton.ButtonType.success.ToString()"
+<DXButton text="@this.Text" hint="Example Hint"
+          type="@DXButton.ButtonType.success.ToString()"
           icon="check"
-          onclick="@Clicked"></DxButton>
+          onclick="@Clicked"></DXButton>
+
+@*<div>
+        <DXCalendar onValueChanged="@ValueChanged"></DXCalendar>
+    </div>*@
 
 <div>
-    <DxCalendar onValueChanged="@ValueChanged"></DxCalendar>
-</div>
-
-<div>
-    <DxColorBox onValueChanged="@ValueChanged"
-                applyButtonText="apply button"
-                disabled="@colorboxDisabled"></DxColorBox>
-    <DxButton text="Disable/Enable"
-              onclick="(x => { colorboxDisabled = !colorboxDisabled; this.StateHasChanged(); })"></DxButton>
+    @*<DXColorBox onValueChanged="@ValueChanged"
+                    applyButtonText="apply button"
+                    disabled="@colorboxDisabled"></DXColorBox>
+        <DXButton text="Disable/Enable"
+                  onclick="(x => { colorboxDisabled = !colorboxDisabled; this.StateHasChanged(); })"></DXButton>*@
     <span disabled="@colorboxDisabled">
         @colorboxDisabled
     </span>
+
+    <DXAccordion dataSource="this.listString">
+        <itemTitleTemplate>
+            @{
+                var item = builder2_Param1 as StandaloneApp.DXTemplateItem;
+            }
+            title @item.itemIndex @item.itemData
+        </itemTitleTemplate>
+
+        <itemTemplate>
+            @{
+                var item2 = builder2_Param1 as StandaloneApp.DXTemplateItem;
+            }
+            item @item2.itemIndex @item2.itemData
+            <button onclick="@(x => remove(item2.itemIndex))">remove</button>
+        </itemTemplate>
+    </DXAccordion>
 </div>
 
 
@@ -29,11 +46,42 @@ Welcome to your new app.
 @functions {
 string Text = "Example Button";
 bool colorboxDisabled = true;
+List<string> listString;
+
+protected override void OnInit()
+{
+    listString = new List<string>();
+    listString.Add("1");
+    listString.Add("2");
+    //listString.Add("3");
+    //listString.Add("4");
+    //listString.Add("5");
+
+    base.OnInit();
+}
+
+protected void remove(int index)
+{
+    listString.RemoveAt(index);
+    listString = new List<string>(listString);
+
+    this.StateHasChanged();
+}
+
+private int c = 1;
 
 protected void Clicked(UICustomEventArgs e)
 {
     Text += " Clicked!";
     Console.WriteLine($"Click! {e.Type} {e.Value}");
+
+    // need to be immutable
+    listString = new List<string>(listString);
+    listString.Add($"{c++}xxx");
+    listString.Add($"{c++}xxx");
+    listString.Add($"{c++}xxx");
+    listString.Add($"{c++}xxx");
+
     this.StateHasChanged();
 }
 
