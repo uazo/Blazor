@@ -154,13 +154,9 @@ export class BlazorDOMElement {
       }
     }
 
-    let attributeValue : string | null;
+    let attributeValue : string | null = frameReader.attributeValue(attributeFrame);
     if (frameReader.hasAttributeValueJson(attributeFrame)) {
-      const json = frameReader.attributeValueJson(attributeFrame)!;
-      attributeValue = JSON.parse(json);
-    }
-    else {
-      attributeValue = frameReader.attributeValue(attributeFrame);
+      attributeValue = JSON.parse(attributeValue!);
     }
 		if (this.isDOMAttribute(attributeName, attributeValue) == false) {
 			return; // If this DOM element type has special 'value' handling, don't also write it as an attribute

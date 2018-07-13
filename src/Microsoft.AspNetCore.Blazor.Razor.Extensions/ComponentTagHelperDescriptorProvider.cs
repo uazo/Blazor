@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -23,6 +23,10 @@ namespace Microsoft.AspNetCore.Blazor.Razor
         private static MethodInfo WithMetadataImportOptionsMethodInfo =
             typeof(CSharpCompilationOptions)
                 .GetMethod("WithMetadataImportOptions", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+        private static readonly System.Text.RegularExpressions.Regex RegexCheckFragmentIsGeneric =
+            new System.Text.RegularExpressions.Regex($"{BlazorApi.RenderFragment.FullTypeName}<(.*)>");
+
 
         public bool IncludeDocumentation { get; set; }
 
@@ -84,7 +88,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             for (var i = 0; i < types.Count; i++)
             {
                 var type = types[i];
-                context.Results.Add(CreateDescriptor(type, parameterSymbol, blazorComponentSymbol));
+                foreach( var tagHelpers in CreateDescriptor(type, parameterSymbol, blazorComponentSymbol))
+                    context.Results.Add(tagHelpers);
             }
         }
 
@@ -95,7 +100,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             return compilation.WithOptions(newCompilationOptions);
         }
 
-        private TagHelperDescriptor CreateDescriptor(INamedTypeSymbol type, INamedTypeSymbol parameterSymbol, INamedTypeSymbol blazorComponentSymbol)
+        private List<TagHelperDescriptor> CreateDescriptor(INamedTypeSymbol type, INamedTypeSymbol parameterSymbol, INamedTypeSymbol blazorComponentSymbol)
         {
             if (type == null)
             {
@@ -126,6 +131,9 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             // Components have very simple matching rules. The type name (short) matches the tag name.
             builder.TagMatchingRule(r => r.TagName = type.Name);
 
+            // List of all RenderFragment (and derived) props
+            List<TemplatePropDescriptor> renderFragmentPropList = new List<TemplatePropDescriptor>();
+
             foreach (var property in GetProperties(type, parameterSymbol, blazorComponentSymbol))
             {
                 if (property.kind == PropertyKind.Ignored)
@@ -154,12 +162,81 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                     {
                         pb.Documentation = xml;
                     }
+
+                    if( pb.TypeName.StartsWith(BlazorApi.RenderFragment.FullTypeName))
+                    {
+                        // is a RenderFragment prop
+                        renderFragmentPropList.Add(new TemplatePropDescriptor() {
+                            Name = pb.Name,
+                            FullType = pb.TypeName
+                        });
+                    }
                 });
             }
 
-            var descriptor = builder.Build();
+            List<TagHelperDescriptor> tagHelpers = new List<TagHelperDescriptor>();
 
-            return descriptor;
+            // only if for component with RenderFragments props
+            if (renderFragmentPropList.Count() != 0) 
+            {
+                // mark tagHelper as templated component
+                builder.Metadata[BlazorMetadata.Component.TemplatedComponent] = bool.TrueString;
+
+                // create sub tags for all template props
+                foreach (var propDescriptor in renderFragmentPropList)
+                {
+                    if (propDescriptor.Name == BlazorApi.RenderTreeBuilder.ChildContent)
+                        continue; // skip "ChildContent" property
+
+                    var templateName = $"{type.Name}.{propDescriptor.Name}";
+
+                    // we can allow all childs tag, but not now
+                    // builder.AllowChildTag(conf => conf.Name = templateName);
+
+                    // create attribute tag helper
+                    var templateTypeName = $"{typeName}.{propDescriptor.Name}";
+                    var builderTagHelperTemplate = TagHelperDescriptorBuilder.Create(BlazorMetadata.Component.TagHelperKind, templateTypeName, assemblyName);
+
+                    builderTagHelperTemplate.SetTypeName(templateTypeName);
+                    builderTagHelperTemplate.Metadata[TagHelperMetadata.Runtime.Name] = BlazorMetadata.Component.RuntimeName;
+
+                    builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentProp] = bool.TrueString;
+                    builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentPropName] = propDescriptor.Name;
+                    builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentPropTypeName] = propDescriptor.FullType;
+
+                    var isGeneric = RegexCheckFragmentIsGeneric.Match(propDescriptor.FullType);
+                    if( isGeneric.Success)
+                    {
+                        builderTagHelperTemplate.Metadata[BlazorMetadata.Component.TemplatedComponentPropWithGenerics] = bool.TrueString;
+
+                        // NOTE: without any access to TagHelperFactsService
+                        // (exposed by Microsoft.VisualStudio.Web.Editors.Razor.TagHelpers.TagHelperScriptOrStyleTagNameService)
+                        // we can't inhibit showing BindTagHelperDescriptorProvider bind attributes for this taghelper,
+                        // so intellisense will show "WithParams" and other props!
+                        builderTagHelperTemplate.BindAttribute(pb =>
+                        {
+                            // doesn't not exist same of RequiredAttributeDescriptor for BoundAttributeDescriptor
+                            // we cant't require it
+                            pb.Name = BlazorApi.ITemplatedComponent.WithParamsAttibuteName;
+                            pb.TypeName = "System.String";
+                            pb.SetPropertyName(pb.Name);
+                        });
+                    }
+
+                    builderTagHelperTemplate.TagMatchingRule(r =>
+                    {
+                        r.TagName = templateName; // NOTE: the tag is {typeName}.{propDescriptor.Name}
+                                                  // to distinguish from others components
+                        r.ParentTag = type.Name; // Allow for this parent
+                    });
+                    tagHelpers.Add(builderTagHelperTemplate.Build());
+                }
+            }
+
+            var descriptor = builder.Build();
+            tagHelpers.Add(descriptor);
+
+            return tagHelpers;
         }
 
         // Does a walk up the inheritance chain to determine the set of parameters by using
@@ -301,6 +378,12 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                     !symbol.IsGenericType &&
                     symbol.AllInterfaces.Contains(_interface);
             }
+        }
+
+        private class TemplatePropDescriptor
+        {
+            internal string Name { get; set; }
+            internal string FullType { get; set; }
         }
     }
 }

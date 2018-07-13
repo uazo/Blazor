@@ -43,7 +43,7 @@ export interface RenderTreeEditReader {
 export interface RenderTreeFrameReader {
   frameType(frame: RenderTreeFrame): FrameType;
   subtreeLength(frame: RenderTreeFrame): number;
-  elementReferenceCaptureId(frame: RenderTreeFrame): number;
+  elementReferenceCaptureId(frame: RenderTreeFrame): string | null;
   componentId(frame: RenderTreeFrame): number;
   elementName(frame: RenderTreeFrame): string | null;
   textContent(frame: RenderTreeFrame): string | null;
@@ -52,7 +52,6 @@ export interface RenderTreeFrameReader {
   attributeEventHandlerId(frame: RenderTreeFrame): number;
   customComponentType(frame: RenderTreeFrame): number;
   hasAttributeValueJson(frame: RenderTreeFrame): boolean;
-  attributeValueJson(frame: RenderTreeFrame): string | null;
 }
 
 export interface ArrayRange<T> { ArrayRange__DO_NOT_IMPLEMENT: any }

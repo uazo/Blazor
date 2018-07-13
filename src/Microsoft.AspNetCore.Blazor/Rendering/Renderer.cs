@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Blazor.Components;
 using Microsoft.AspNetCore.Blazor.RenderTree;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Blazor.Rendering
 {
@@ -213,10 +212,14 @@ namespace Microsoft.AspNetCore.Blazor.Rendering
             }
             finally
             {
+                var disposedEventHandlerIdsArray = _batchBuilder.DisposedEventHandlerIds.ToRange().Array;
+                int[] disposedEventHandlerIds= new int[disposedEventHandlerIdsArray.Length];
+                disposedEventHandlerIdsArray.CopyTo(disposedEventHandlerIds, 0);
+
                 _batchBuilder.Clear();
                 _isBatchInProgress = false;
                 if (ProcessEventQueue() != 0) reprocess = true;
-                RemoveEventHandlerIds(_batchBuilder.DisposedEventHandlerIds.ToRange());
+                RemoveEventHandlerIds(disposedEventHandlerIds);
             }
             if (reprocess) ProcessRenderQueue();
         }
@@ -247,13 +250,11 @@ namespace Microsoft.AspNetCore.Blazor.Rendering
             }
         }
 
-        private void RemoveEventHandlerIds(ArrayRange<int> eventHandlerIds)
+        private void RemoveEventHandlerIds(int[] eventHandlerIds)
         {
-            var array = eventHandlerIds.Array;
-            var count = eventHandlerIds.Count;
-            for (var i = 0; i < count; i++)
+            foreach (var i in eventHandlerIds)
             {
-                _eventBindings.Remove(array[i]);
+                _eventBindings.Remove(i);
             }
         }
     }

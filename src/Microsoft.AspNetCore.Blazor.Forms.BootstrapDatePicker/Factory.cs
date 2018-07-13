@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Blazor.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using System;
@@ -16,7 +17,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// <summary>
         /// Register custom DOMComponent
         /// </summary>
-        public static IServiceCollection AddDatePicker(this IServiceCollection services)
+        public static IBlazorApplicationBuilder AddDatePicker(this IBlazorApplicationBuilder services)
         {
             DateTimePickerComponentId = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(Components.DatePicker));
             //JSRuntime.Current.InvokeAsync<bool>("RegisterDateTimePickerComponentId", DateTimePickerComponentId);

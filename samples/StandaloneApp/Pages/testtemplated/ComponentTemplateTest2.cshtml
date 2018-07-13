@@ -1,9 +1,14 @@
 <div><button onclick="@ClickMe">Click me</button></div>
+<div>@message</div>
 
 <div>
-    @foreach (var item in list)
-    {
-        <div>@((RenderFragment)(x => RowTemplate?.Invoke(x, item)))</div>
+    @{
+      int count = 0;
+      foreach (var item in list)
+      {
+        <div>@count: @RowTemplate?.Render(item)</div>
+        count++;
+      }
     }
 </div>
 
@@ -19,6 +24,7 @@
   }
 
   private List<TestObject> list = new List<TestObject>();
+  string message { get; set; }
 
   protected override void OnInit()
   {
@@ -36,6 +42,7 @@
   void ClickMe()
   {
       int rnd = new Random().Next(list.Count());
+      message = $"Updated index {rnd}, was {list.ElementAt(rnd).PropInt}";
       list.ElementAt(rnd).PropInt++;
   }
 }

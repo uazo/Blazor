@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Blazor.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// <summary>
         /// Register custom DOMComponent
         /// </summary>
-        public static IServiceCollection AddForms(this IServiceCollection services)
+        public static IBlazorApplicationBuilder AddForms(this IBlazorApplicationBuilder services)
         {
             return services;
         }

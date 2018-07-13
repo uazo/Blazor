@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Blazor.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
         /// <summary>
         /// Register custom DOMComponent
         /// </summary>
-        public static IServiceCollection AddGritter(this IServiceCollection services)
+        public static IBlazorApplicationBuilder AddGritter(this IBlazorApplicationBuilder services)
         {
             return services;
         }

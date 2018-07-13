@@ -5,8 +5,7 @@ var cOptions = {}
 var libraryName = "blazor";
 var outputFolder = "dist";
 
-module.exports = function (env) {
-
+module.exports = function (env, args) {
   var plugins = [];
   if (env && env.declaration === "yes") {
     cOptions = {
@@ -21,7 +20,7 @@ module.exports = function (env) {
 
   return {
     resolve: { extensions: ['.ts', '.js'] },
-    devtool: 'inline-source-map',
+    devtool: args.mode === 'development' ? 'inline-source-map' : 'none',
     module: {
       rules: [{
         test: /\.ts?$/,
@@ -31,9 +30,11 @@ module.exports = function (env) {
         }
       }]
     },
-    entry: { libraryName: './src/Boot.ts' },
+    entry: {
+      'blazor.webassembly': './src/Boot.WebAssembly.ts',
+    },
     output: {
-      path: path.join(__dirname, '/' + outputFolder), filename: libraryName + '.js',
+      path: path.join(__dirname, '/' + outputFolder), filename: '[name].js',
       library: libraryName,
       //libraryTarget: 'umd',
       //umdNamedDefine: true

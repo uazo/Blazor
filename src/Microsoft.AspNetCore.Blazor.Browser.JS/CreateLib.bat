@@ -1,1 +1,1 @@
-webpack --env.declaration=yes
+webpack --env.declaration=yes --mode development

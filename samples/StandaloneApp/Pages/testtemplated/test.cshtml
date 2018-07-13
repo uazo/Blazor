@@ -3,28 +3,31 @@
 <h1>Templated TEST</h1>
 
 <ComponentTemplateTest>
-    <Template>
+    <ComponentTemplateTest.Template>
         test simple template
-    </Template>
+    </ComponentTemplateTest.Template>
 
-    <TemplateWithInt params="param1">
+    <ComponentTemplateTest.TemplateWithInt WithParams="param1">
         @param1
-    </TemplateWithInt>
+    </ComponentTemplateTest.TemplateWithInt>
 
-    <TemplateWithObject params="paramObject">
+    <ComponentTemplateTest.TemplateWithObject WithParams="paramObject">
         <div>
             propint = @paramObject.PropInt
         </div>
         <div>
             PropString = @paramObject.PropString
         </div>
-    </TemplateWithObject>
+    </ComponentTemplateTest.TemplateWithObject>
+
+    <div>this is childcontent (1)</div>
+    <div>this is childcontent (2)</div>
 </ComponentTemplateTest>
 
 <br /><br />
 
 <ComponentTemplateTest2>
-    <RowTemplate params="x">
+    <ComponentTemplateTest2.RowTemplate WithParams="x">
         @x.PropInt -- @x.PropString
-    </RowTemplate>
+    </ComponentTemplateTest2.RowTemplate>
 </ComponentTemplateTest2>

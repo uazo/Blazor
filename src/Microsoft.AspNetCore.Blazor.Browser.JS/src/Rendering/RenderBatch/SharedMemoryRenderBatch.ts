@@ -77,7 +77,7 @@ const frameReader = {
   structLength: 28,
   frameType: (frame: RenderTreeFrame) => platform.readInt16Field(frame as any, 4) as FrameType,
   subtreeLength: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 8),
-  elementReferenceCaptureId: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 8),
+  elementReferenceCaptureId: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 16),
   componentId: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 12),
   elementName: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 16),
   textContent: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 16),
@@ -85,8 +85,7 @@ const frameReader = {
   attributeValue: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 24),
   attributeEventHandlerId: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 8),
   customComponentType: (frame: RenderTreeFrame) => platform.readInt16Field(frame as any, 6),
-  hasAttributeValueJson: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 12) != 0,
-  attributeValueJson: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 12)
+  hasAttributeValueJson: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 12) != 0
 };
 
 function arrayValuesEntry<T>(arrayValues: ArrayValues<T>, index: number, itemSize: number): T {
