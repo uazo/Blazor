@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Blazor.Components
     /// <summary>
     /// Resolves components for an application.
     /// </summary>
-    internal class ComponentResolver
+    internal static class ComponentResolver
     {
         /// <summary>
         /// Lists all the types 

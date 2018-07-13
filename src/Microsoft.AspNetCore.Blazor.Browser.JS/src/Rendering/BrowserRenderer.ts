@@ -201,7 +201,7 @@ export class BrowserRenderer {
         {
           let parentElement = parent.getClosestDomElement() as Element;
           if (parentElement instanceof Element) {
-            applyCaptureIdToElement(parentElement, frameReader.elementReferenceCaptureId(frame));
+            applyCaptureIdToElement(parentElement, frameReader.elementReferenceCaptureId(frame)!);
             return 0; // A "capture" is a child in the diff, but has no node in the DOM
           } else {
             throw new Error('Reference capture frames can only be children of element frames.');
@@ -312,30 +312,24 @@ export class BrowserRenderer {
   }
 }
 
-export function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
-  if (event !== null && event.preventDefault !== undefined)
-    event.preventDefault();
+async function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
+	if (event !== null && event.preventDefault !== undefined)
+		event.preventDefault();
 
-  if (!raiseEventMethod) {
-    raiseEventMethod = platform.findMethod(
-      'Microsoft.AspNetCore.Blazor.Browser', 'Microsoft.AspNetCore.Blazor.Browser.Rendering', 'BrowserRendererEventDispatcher', 'DispatchEvent'
-    );
-  }
-
-  const eventDescriptor = {
+	const eventDescriptor = {
     browserRendererId,
     componentId,
     eventHandlerId,
     eventArgsType: eventArgs.type
-  };
+	};
 
-  let t0 = performance.now();
+	let t0 = performance.now();
+  await DotNet.invokeMethodAsync(
+    'Microsoft.AspNetCore.Blazor.Browser',
+    'DispatchEvent',
+    eventDescriptor,
+		JSON.stringify(eventArgs.data));
 
-  platform.callMethod(raiseEventMethod, null, [
-    platform.toDotNetString(JSON.stringify(eventDescriptor)),
-    platform.toDotNetString(JSON.stringify(eventArgs.data))
-  ]);
-
-  let t1 = performance.now();
-  console.log("BrowserRendererEventDispatcher took " + (t1 - t0) + " milliseconds.")
+	let t1 = performance.now();
+	console.log("BrowserRendererEventDispatcher took " + (t1 - t0) + " milliseconds.")
 }

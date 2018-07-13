@@ -1,8 +1,7 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using Microsoft.AspNetCore.Blazor.Browser.Rendering;
-using Microsoft.AspNetCore.Blazor.Browser.Services;
+using Microsoft.AspNetCore.Blazor.Hosting;
 using Microsoft.AspNetCore.Blazor.Forms;
 
 namespace StandaloneApp
@@ -13,14 +12,15 @@ namespace StandaloneApp
         {
             var serviceProvider = new BrowserServiceProvider(configure =>
             {
-                configure.AddForms();
-                configure.AddDatePicker();
-                configure.AddGritter();
-                configure.AddDropZone();
-                // Add any custom services here
-            });
+							// Add any custom services here
+							configure.AddForms();
+							configure.AddDatePicker();
+							configure.AddGritter();
+							configure.AddDropZone();
+						});
 
-            new BrowserRenderer(serviceProvider).AddComponent<App>("app");
-        }
+        public static IWebAssemblyHostBuilder CreateHostBuilder(string[] args) =>
+            BlazorWebAssemblyHost.CreateDefaultBuilder()
+                .UseBlazorStartup<Startup>();
     }
 }

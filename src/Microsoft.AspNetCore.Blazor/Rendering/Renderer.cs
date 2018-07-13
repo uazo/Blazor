@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Blazor.Components;
 using Microsoft.AspNetCore.Blazor.RenderTree;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Blazor.Rendering
 {
