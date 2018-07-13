@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Blazor.RenderTree;
@@ -52,6 +52,11 @@ namespace Microsoft.AspNetCore.Blazor.Components
         {
             // Developers can either override this method in derived classes, or can use Razor
             // syntax to define a derived class and have the compiler generate the method.
+            BeginNewRendering();
+        }
+
+        private void BeginNewRendering()
+        {
             _hasPendingQueuedRender = false;
             _hasNeverRendered = false;
         }
@@ -99,7 +104,8 @@ namespace Microsoft.AspNetCore.Blazor.Components
         {
             if (_hasPendingQueuedRender)
             {
-                return;
+                BeginNewRendering();
+                //return;
             }
 
             if (_hasNeverRendered || ShouldRender())

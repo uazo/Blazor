@@ -14,6 +14,8 @@ export class BlazorDOMComponent extends BlazorDOMElement {
 
     super(br, markerStart, markerEnd);
     this.ComponentID = CID;
+
+    parent.onChildAttached(this);
   }
 
   public getClosestDomElement(): Node {
@@ -25,7 +27,7 @@ export class BlazorDOMComponent extends BlazorDOMElement {
   }
 
   protected setAttribute(attributeName: string, attributeValue: string | null) {
-    // Blazor DOM Component do not have attributes
+    // Blazor DOM Component do not have HTML attributes
   }
 
   protected raiseEvent(eventHandlerId: number, evt: EventForDotNet<UIEventArgs>) {

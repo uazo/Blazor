@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Blazor.Components;
@@ -25,6 +25,16 @@ namespace Microsoft.AspNetCore.Blazor.Rendering
 
         private int _lastEventHandlerId = 0;
         private readonly Dictionary<int, EventHandlerInvoker> _eventBindings = new Dictionary<int, EventHandlerInvoker>();
+
+
+        private class EventQueueData
+        {
+            internal int componentId;
+            internal int eventHandlerId;
+            internal UIEventArgs eventArgs;
+        }
+
+        private List<EventQueueData> _EventQueueData = new List<EventQueueData>();
 
         /// <summary>
         /// Constructs an instance of <see cref="Renderer"/>.
@@ -72,8 +82,25 @@ namespace Microsoft.AspNetCore.Blazor.Rendering
         /// <param name="eventArgs">Arguments to be passed to the event handler.</param>
         protected void DispatchEvent(int componentId, int eventHandlerId, UIEventArgs eventArgs)
         {
+            _DispatchEvent(componentId, eventHandlerId, eventArgs, true);
+        }
+
+        private void _DispatchEvent(int componentId, int eventHandlerId, UIEventArgs eventArgs, bool processRenderQueue)
+        {
             if (_eventBindings.TryGetValue(eventHandlerId, out var binding))
             {
+                if( _isBatchInProgress)
+                {
+                    // queue event
+                    _EventQueueData.Add(new EventQueueData()
+                    {
+                        componentId = componentId,
+                        eventHandlerId = eventHandlerId,
+                        eventArgs = eventArgs
+                    });
+                    return;
+                }
+
                 // The event handler might request multiple renders in sequence. Capture them
                 // all in a single batch.
                 try
@@ -84,13 +111,28 @@ namespace Microsoft.AspNetCore.Blazor.Rendering
                 finally
                 {
                     _isBatchInProgress = false;
-                    ProcessRenderQueue();
+                    ProcessEventQueue();
+                    if (processRenderQueue) ProcessRenderQueue();
                 }
             }
             else
             {
                 throw new ArgumentException($"There is no event handler with ID {eventHandlerId}");
             }
+        }
+
+        private int ProcessEventQueue()
+        {
+            // copy and clear queue
+            var evtList = _EventQueueData.ToArray();
+            _EventQueueData.Clear();
+
+            // dispatch event
+            foreach (var evt in evtList)
+            {
+                _DispatchEvent(evt.componentId, evt.eventHandlerId, evt.eventArgs, false);
+            }
+            return evtList.Length; // number of events dispatched
         }
 
         internal void InstantiateChildComponentOnFrame(ref RenderTreeFrame frame)
@@ -155,6 +197,7 @@ namespace Microsoft.AspNetCore.Blazor.Rendering
         {
             _isBatchInProgress = true;
 
+            bool reprocess = false;
             try
             {
                 // Process render queue until empty
@@ -170,10 +213,12 @@ namespace Microsoft.AspNetCore.Blazor.Rendering
             }
             finally
             {
-                RemoveEventHandlerIds(_batchBuilder.DisposedEventHandlerIds.ToRange());
                 _batchBuilder.Clear();
                 _isBatchInProgress = false;
+                if (ProcessEventQueue() != 0) reprocess = true;
+                RemoveEventHandlerIds(_batchBuilder.DisposedEventHandlerIds.ToRange());
             }
+            if (reprocess) ProcessRenderQueue();
         }
 
         private void InvokeRenderCompletedCalls(ArrayRange<RenderTreeDiff> updatedComponents)

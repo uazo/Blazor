@@ -1,4 +1,4 @@
-import { System_Array, MethodHandle } from '../Platform/Platform';
+import { System_Array, MethodHandle, System_String } from '../Platform/Platform';
 import { RenderBatch, ArraySegment, ArrayRange, RenderTreeEdit, RenderTreeFrame, EditType, FrameType, ArrayValues } from './RenderBatch/RenderBatch';
 import { platform } from '../Environment';
 import { EventDelegator } from './EventDelegator';
@@ -75,6 +75,9 @@ export class BrowserRenderer {
     var elementStack = new Array();
     elementStack.push(parent);
 
+    var elementsNeedRendering = new Array();
+    elementsNeedRendering.push(parent);
+
     for (let editIndex = editsOffset; editIndex < maxEditIndexExcl; editIndex++) {
       const edit = batch.diffReader.editsEntry(editsValues, editIndex);
       const editType = editReader.editType(edit);
@@ -105,6 +108,8 @@ export class BrowserRenderer {
           else {
             const blazorElement = element as any as BlazorDOMElement;
             blazorElement.applyAttribute(batch, componentId, frame);
+            if (elementsNeedRendering.findIndex(x => x == blazorElement) == -1)
+              elementsNeedRendering.push(blazorElement);
           }
           break;
         }
@@ -144,6 +149,9 @@ export class BrowserRenderer {
           if (stepInElement instanceof BlazorDOMElement == false) {
             parent = createBlazorDOMElement(this, stepInElement as HTMLElement);
           }
+          else {
+            parent = stepInElement as BlazorDOMElement;
+          }
           parent.onDOMUpdating();
 
           currentDepth++;
@@ -151,11 +159,7 @@ export class BrowserRenderer {
           break;
         }
         case EditType.stepOut: {
-          parent.onDOMUpdated();
-          //if (parent.isComponent() == false) {
-          //    // Dispose if a simple dom element (=BlazorDOMElement)
-          //    parent.dispose();
-          //}
+          elementsNeedRendering.push(parent);
 
           parent = elementStack.pop();
           currentDepth--;
@@ -169,7 +173,11 @@ export class BrowserRenderer {
       }
     }
 
-    parent.onDOMUpdated();
+    let needRendering = elementsNeedRendering.pop() as BlazorDOMElement;
+    while (needRendering) {
+      needRendering.onDOMUpdated();
+      needRendering = elementsNeedRendering.pop();
+    }
   }
 
   private insertFrame(batch: RenderBatch, componentId: number, parent: BlazorDOMElement, childIndex: number, frames: ArrayValues<RenderTreeFrame>, frame: RenderTreeFrame, frameIndex: number): number {
@@ -208,28 +216,31 @@ export class BrowserRenderer {
   private insertElement(batch: RenderBatch, componentId: number, parent: BlazorDOMElement, childIndex: number, frames: ArrayValues<RenderTreeFrame>, frame: RenderTreeFrame, frameIndex: number) {
     const frameReader = batch.frameReader;
     const tagName = frameReader.elementName(frame)!;
-    const newDomElement = this.createElement(tagName, parent);
-    parent.insertNodeIntoDOM(newDomElement, childIndex);
+    const newDomElement = parent.createElement(tagName, childIndex);
 
-    let blazorElement = createBlazorDOMElement(this, newDomElement);
+    if (newDomElement !== null && newDomElement !== undefined) {
+      parent.insertNodeIntoDOM(newDomElement, childIndex);
 
-    // Apply attributes
-    const descendantsEndIndexExcl = frameIndex + frameReader.subtreeLength(frame);
-    for (let descendantIndex = frameIndex + 1; descendantIndex < descendantsEndIndexExcl; descendantIndex++) {
-      const descendantFrame = batch.referenceFramesEntry(frames, descendantIndex);
+      let blazorElement = createBlazorDOMElement(this, newDomElement);
 
-      if (frameReader.frameType(descendantFrame) === FrameType.attribute) {
-        blazorElement.applyAttribute(batch, componentId, descendantFrame);
-      } else {
-        // As soon as we see a non-attribute child, all the subsequent child frames are
-        // not attributes, so bail out and insert the remnants recursively
-        this.insertFrameRange(batch, componentId, blazorElement, 0, frames, descendantIndex, descendantsEndIndexExcl);
-        break;
+      // Apply attributes
+      const descendantsEndIndexExcl = frameIndex + frameReader.subtreeLength(frame);
+      for (let descendantIndex = frameIndex + 1; descendantIndex < descendantsEndIndexExcl; descendantIndex++) {
+        const descendantFrame = batch.referenceFramesEntry(frames, descendantIndex);
+
+        if (frameReader.frameType(descendantFrame) === FrameType.attribute) {
+          blazorElement.applyAttribute(batch, componentId, descendantFrame);
+        } else {
+          // As soon as we see a non-attribute child, all the subsequent child frames are
+          // not attributes, so bail out and insert the remnants recursively
+          this.insertFrameRange(batch, componentId, blazorElement, 0, frames, descendantIndex, descendantsEndIndexExcl);
+          break;
+        }
       }
-    }
 
-    blazorElement.onDOMUpdated();
-    blazorElement.dispose();
+      blazorElement.onDOMUpdated();
+      blazorElement.dispose();
+    }
   }
 
   private insertComponent(batch: RenderBatch, parent: BlazorDOMElement, childIndex: number, frame: RenderTreeFrame, frames: ArrayValues<RenderTreeFrame>, frameIndex: number) {
@@ -255,14 +266,6 @@ export class BrowserRenderer {
         }
       }
     }
-  }
-
-  private createElement(tagName: string, parentElement: BlazorDOMElement): Element {
-    const parent = parentElement.getClosestDomElement();
-    const newDomElement = tagName === 'svg' || parent.namespaceURI === 'http://www.w3.org/2000/svg' ?
-      document.createElementNS('http://www.w3.org/2000/svg', tagName) :
-      document.createElement(tagName);
-    return newDomElement;
   }
 
   private insertText(batch: RenderBatch, parent: BlazorDOMElement, childIndex: number, textFrame: RenderTreeFrame) {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -27,6 +27,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
         private readonly ArrayBuilder<RenderTreeFrame> _entries = new ArrayBuilder<RenderTreeFrame>(10);
         private readonly Stack<int> _openElementIndices = new Stack<int>();
         private RenderTreeFrameType? _lastNonAttributeFrameType;
+        private short? _lastCustomComponentType;
 
         /// <summary>
         /// The reserved parameter name used for supplying child content.
@@ -287,7 +288,11 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             }
             else if (_lastNonAttributeFrameType == RenderTreeFrameType.Component)
             {
-                Append(RenderTreeFrame.Attribute(sequence, name, value));
+                bool SerializeJson = false;
+                if( _lastCustomComponentType.HasValue && _lastCustomComponentType != 0 &&
+                    value != null && value.GetType().IsPrimitive == false)
+                    SerializeJson = true;
+                Append(RenderTreeFrame.Attribute(sequence, name, value, SerializeJson));
             }
             else
             {
@@ -439,6 +444,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             _entries.Clear();
             _openElementIndices.Clear();
             _lastNonAttributeFrameType = null;
+            _lastCustomComponentType = null;
         }
 
         /// <summary>
@@ -456,6 +462,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             if (frameType != RenderTreeFrameType.Attribute)
             {
                 _lastNonAttributeFrameType = frame.FrameType;
+                _lastCustomComponentType = frame.CustomComponentType;
             }
         }
     }

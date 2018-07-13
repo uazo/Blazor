@@ -84,7 +84,9 @@ const frameReader = {
   attributeName: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 16),
   attributeValue: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 24),
   attributeEventHandlerId: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 8),
-  customComponentType: (frame: RenderTreeFrame) => platform.readInt16Field(frame as any, 6)
+  customComponentType: (frame: RenderTreeFrame) => platform.readInt16Field(frame as any, 6),
+  hasAttributeValueJson: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 12) != 0,
+  attributeValueJson: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 12)
 };
 
 function arrayValuesEntry<T>(arrayValues: ArrayValues<T>, index: number, itemSize: number): T {
