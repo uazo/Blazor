@@ -7,7 +7,7 @@ import { getRegisteredCustomTag, getRegisteredCustomDOMElement } from './Renderi
 
 export function createBlazorDOMElement(br: BrowserRenderer, stepInElement: Element): BlazorDOMElement {
 	let element = getBlazorDomElement(stepInElement);
-	if (element !== undefined) return element;
+  if (element !== null) return element; 
 
 	if (stepInElement.tagName == "INPUT" || stepInElement.tagName == "SELECT" || stepInElement.tagName == "TEXTAREA")
 		return new BlazorINPUTElement(br, stepInElement);

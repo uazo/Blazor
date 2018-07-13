@@ -84,6 +84,14 @@ export class BlazorDOMElement {
 		return null;
 	}
 
+  public createElement(tagName: string, childIndex: number): Element {
+    const parent = this.getClosestDomElement();
+    const newDomElement = tagName === 'svg' || parent.namespaceURI === 'http://www.w3.org/2000/svg' ?
+      document.createElementNS('http://www.w3.org/2000/svg', tagName) :
+      document.createElement(tagName);
+    return newDomElement;
+  }
+
 	public insertNodeIntoDOM(node: Node, childIndex: number) {
 		let parentElement = this.getClosestDomElement();
 
@@ -96,8 +104,9 @@ export class BlazorDOMElement {
 				parentElement.insertBefore(node, this.endContainer);
 			}
 		}
-		else {
-			parentElement.insertBefore(node, realSibling as Node);
+    else {
+      (realSibling as Node).parentElement!.insertBefore(node, realSibling as Node);
+			// better than parentElement.insertBefore(node, realSibling as Node);
 		}
 
     this.startContainer[logicalBlazorChildElementPropname] = [];
@@ -145,7 +154,14 @@ export class BlazorDOMElement {
       }
     }
 
-    const attributeValue = frameReader.attributeValue(attributeFrame);
+    let attributeValue : string | null;
+    if (frameReader.hasAttributeValueJson(attributeFrame)) {
+      const json = frameReader.attributeValueJson(attributeFrame)!;
+      attributeValue = JSON.parse(json);
+    }
+    else {
+      attributeValue = frameReader.attributeValue(attributeFrame);
+    }
 		if (this.isDOMAttribute(attributeName, attributeValue) == false) {
 			return; // If this DOM element type has special 'value' handling, don't also write it as an attribute
 		}
@@ -210,13 +226,16 @@ export class BlazorDOMElement {
 
 	public onDOMUpdating() { }
   public onDOMUpdated() { }
+  public onChildAttached(child: BlazorDOMElement) {}
 
 	public dispose() {
 	}
 }
 
-export function getBlazorDomElement(container: Node) {
-	return container[logicalBlazorDomElementPropname];
+export function getBlazorDomElement(container: Node): BlazorDOMElement | null {
+  if (container[logicalBlazorDomElementPropname] !== undefined) return container[logicalBlazorDomElementPropname] as any as BlazorDOMElement;
+  if (container instanceof BlazorDOMElement) return container;
+  return null;
 }
 
 function createSymbolOrFallback(fallback: string): symbol | string {
