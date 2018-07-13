@@ -153,7 +153,7 @@ export class BrowserRenderer {
         return this.insertFrameRange(batch, componentId, parent, childIndex, frames, frameIndex + 1, frameIndex + frameReader.subtreeLength(frame));
       case FrameType.elementReferenceCapture:
         if (parent instanceof Element) {
-          applyCaptureIdToElement(parent, frameReader.elementReferenceCaptureId(frame));
+          applyCaptureIdToElement(parent, frameReader.elementReferenceCaptureId(frame)!);
           return 0; // A "capture" is a child in the diff, but has no node in the DOM
         } else {
           throw new Error('Reference capture frames can only be children of element frames.');
@@ -320,13 +320,7 @@ function countDescendantFrames(batch: RenderBatch, frame: RenderTreeFrame): numb
   }
 }
 
-function raiseEvent(event: Event, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
-  if (!raiseEventMethod) {
-    raiseEventMethod = platform.findMethod(
-      'Microsoft.AspNetCore.Blazor.Browser', 'Microsoft.AspNetCore.Blazor.Browser.Rendering', 'BrowserRendererEventDispatcher', 'DispatchEvent'
-    );
-  }
-
+async function raiseEvent(event: Event, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
   const eventDescriptor = {
     browserRendererId,
     componentId,
@@ -334,8 +328,9 @@ function raiseEvent(event: Event, browserRendererId: number, componentId: number
     eventArgsType: eventArgs.type
   };
 
-  platform.callMethod(raiseEventMethod, null, [
-    platform.toDotNetString(JSON.stringify(eventDescriptor)),
-    platform.toDotNetString(JSON.stringify(eventArgs.data))
-  ]);
+  await DotNet.invokeMethodAsync(
+    'Microsoft.AspNetCore.Blazor.Browser',
+    'DispatchEvent',
+    eventDescriptor,
+    JSON.stringify(eventArgs.data));
 }
