@@ -312,7 +312,7 @@ export class BrowserRenderer {
   }
 }
 
-async function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
+export async function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
 	if (event !== null && event.preventDefault !== undefined)
 		event.preventDefault();
 

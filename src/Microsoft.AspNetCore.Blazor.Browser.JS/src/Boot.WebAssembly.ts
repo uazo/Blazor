@@ -40,9 +40,21 @@ async function boot() {
   // Before we start running .NET code, be sure embedded content resources are all loaded
   await Promise.all(embeddedResourcePromises)
 
+  // Trigger BlazorOnLoad event
+  if (window) {
+    let evt = new Event('BlazorOnLoad');
+    window.dispatchEvent(evt);
+  }
+
   // Start up the application
   const mainAssemblyName = getAssemblyNameFromUrl(bootConfig.main);
   platform.callEntryPoint(mainAssemblyName, bootConfig.entryPoint, []);
+
+  // Trigger BlazorOnStart event
+  if (window) {
+    let evt = new Event('BlazorOnStart');
+    window.dispatchEvent(evt);
+  }
 }
 
 function startLoadingEmbeddedResources(bootConfig: BootJsonData) {

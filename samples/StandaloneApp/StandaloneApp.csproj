@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Forms.BootstrapDatePicker\Microsoft.AspNetCore.Blazor.Forms.BootstrapDatePicker.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Forms.DropZone\Microsoft.AspNetCore.Blazor.Forms.DropZone.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Forms.Gritter\Microsoft.AspNetCore.Blazor.Forms.Gritter.csproj" />

@@ -5,8 +5,7 @@ var cOptions = {}
 var libraryName = "blazor";
 var outputFolder = "dist";
 
-module.exports = function (env) {
-
+module.exports = function (env, args) {
   var plugins = [];
   if (env && env.declaration === "yes") {
     cOptions = {
@@ -32,10 +31,10 @@ module.exports = function (env) {
       }]
     },
     entry: {
-    	'blazor.webassembly': './src/Boot.WebAssembly.ts',
+      'blazor.webassembly': './src/Boot.WebAssembly.ts',
     },
     output: {
-      path: path.join(__dirname, '/' + outputFolder), filename: libraryName + '.js',
+      path: path.join(__dirname, '/' + outputFolder), filename: '[name].js',
       library: libraryName,
       //libraryTarget: 'umd',
       //umdNamedDefine: true

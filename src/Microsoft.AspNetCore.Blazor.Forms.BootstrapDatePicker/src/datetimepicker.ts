@@ -18,6 +18,8 @@ class DateTimePickerComponent extends Blazor.BlazorDOMComponent {
   onDOMUpdated() {
     if (this.DatePicker === null) {
       let input = this.getDOMElement().nextSibling! as HTMLElement;
+      if (input.nodeType == 8) return; // is comment
+
       let value = new Date(((input.firstChild) as HTMLInputElement).value);
       let _this = this;
 

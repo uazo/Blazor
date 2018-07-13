@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Blazor.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Blazor.Forms;
 
 namespace StandaloneApp
 {
@@ -15,6 +16,10 @@ namespace StandaloneApp
         public void Configure(IBlazorApplicationBuilder app)
         {
             app.AddComponent<App>("app");
+            app.AddForms();
+            app.AddDatePicker();
+            app.AddGritter();
+            app.AddDropZone();
         }
     }
 }

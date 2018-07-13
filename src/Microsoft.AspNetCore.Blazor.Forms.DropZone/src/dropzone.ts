@@ -35,6 +35,8 @@ class DropZoneElement extends Blazor.BlazorDOMComponent {
       let _this = this;
 
       let input = this.getDOMElement().nextSibling! as HTMLElement;
+      if (input.nodeType == 8) return; // is comment
+
       this.myDropzone = new Dropzone(input, {
         url: this.url,
         maxFiles: this.maxFiles,

@@ -52,7 +52,6 @@ export interface RenderTreeFrameReader {
   attributeEventHandlerId(frame: RenderTreeFrame): number;
   customComponentType(frame: RenderTreeFrame): number;
   hasAttributeValueJson(frame: RenderTreeFrame): boolean;
-  attributeValueJson(frame: RenderTreeFrame): string | null;
 }
 
 export interface ArrayRange<T> { ArrayRange__DO_NOT_IMPLEMENT: any }
