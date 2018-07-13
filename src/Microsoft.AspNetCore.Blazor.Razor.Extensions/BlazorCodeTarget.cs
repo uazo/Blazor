@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
         public override IntermediateNodeWriter CreateNodeWriter()
         {
-            return _options.DesignTime ? (BlazorNodeWriter)new Hacked.BlazorDesignTimeNodeWriterWithTemplate() : new Hacked.BlazorRuntimeNodeWriterWithTemplate();
+            return _options.DesignTime ? (BlazorNodeWriter)new BlazorDesignTimeNodeWriter() : new BlazorRuntimeNodeWriter();
         }
 
         public override TExtension GetExtension<TExtension>()

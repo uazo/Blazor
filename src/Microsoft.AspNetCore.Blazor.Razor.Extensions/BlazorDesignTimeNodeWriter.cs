@@ -453,6 +453,31 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             }
         }
 
+        public override void WriteTemplateComponentAttribute(CodeRenderingContext context, TemplateComponentAttributeExtensionNode node)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (node == null)
+            {
+                throw new ArgumentNullException(nameof(node));
+            }
+
+            string[] namedParameters = null;
+            if (string.IsNullOrWhiteSpace(node.TemplatePropArgs) == false) namedParameters = new string[] { node.TemplatePropArgs };
+
+            _scopeStack.CloseLambda(context);
+            _scopeStack.IncrementCurrentScopeChildCount(context,
+                FullTypeName: node.TemplatePropTypeName,
+                AttributeName: node.TemplatePropName,
+                ParametersName: namedParameters);
+
+            foreach (var childOfChild in node.Body)
+                context.RenderNode(childOfChild);
+        }
+
         public override void WriteReferenceCapture(CodeRenderingContext context, RefExtensionNode refNode)
         {
             if (context == null)

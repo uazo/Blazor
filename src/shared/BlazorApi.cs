@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 namespace Microsoft.AspNetCore.Blazor.Shared
@@ -32,6 +32,15 @@ namespace Microsoft.AspNetCore.Blazor.Shared
             public static readonly string FullTypeName = "Microsoft.AspNetCore.Blazor.Components.IComponent";
 
             public static readonly string MetadataName = FullTypeName;
+        }
+
+        public static class ITemplatedComponent
+        {
+            public static readonly string FullTypeName = "Microsoft.AspNetCore.Blazor.Components.ITemplatedComponent";
+
+            public static readonly string MetadataName = FullTypeName;
+
+            public static readonly string WithParamsAttibuteName = "WithParams";
         }
 
         public static class IDictionary

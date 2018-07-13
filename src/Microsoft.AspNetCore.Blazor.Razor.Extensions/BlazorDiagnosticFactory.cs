@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
@@ -162,6 +162,37 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             RazorDiagnosticSeverity.Error);
 
         // Reserved: BL9993 Component parameters should not be public
+
+        public static readonly RazorDiagnosticDescriptor RenderFragmentAttribute_Duplicates =
+            new RazorDiagnosticDescriptor(
+            "BL9994",
+            () => "The attribute '{0}' was matched by multiple tags.",
+            RazorDiagnosticSeverity.Error);
+
+        public static RazorDiagnostic CreateRenderFragmentAttribute_Duplicates(SourceSpan? source, string attribute)
+        {
+            var diagnostic = RazorDiagnostic.Create(
+                RenderFragmentAttribute_Duplicates,
+                source ?? SourceSpan.Undefined,
+                attribute);
+            return diagnostic;
+        }
+
+        public static readonly RazorDiagnosticDescriptor WithParamsAttribute_MustDefined =
+            new RazorDiagnosticDescriptor(
+            "BL9995",
+            () => "The attribute '{0}' must be specified for '{1}'.",
+            RazorDiagnosticSeverity.Error);
+
+        public static RazorDiagnostic CreateWithParamsAttribute_MustDefined(SourceSpan? source, string templatePropName)
+        {
+            var diagnostic = RazorDiagnostic.Create(
+                WithParamsAttribute_MustDefined,
+                source ?? SourceSpan.Undefined,
+                Shared.BlazorApi.ITemplatedComponent.WithParamsAttibuteName,
+                templatePropName);
+            return diagnostic;
+        }
 
         public static RazorDiagnostic Create_DisallowedScriptTag(SourceSpan? source)
         {

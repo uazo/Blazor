@@ -1,7 +1,8 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Razor.Language;
 using Microsoft.AspNetCore.Razor.Language.Intermediate;
 
@@ -9,6 +10,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 {
     internal class ComponentLoweringPass : IntermediateNodePassBase, IRazorOptimizationPass
     {
+        static Regex rxWS = new Regex( @"^[ \t\n\r]*$");
+
         // This pass runs earlier than our other passes that 'lower' specific kinds of attributes.
         public override int Order => 0;
 
@@ -47,7 +50,15 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
                 if (count >= 1)
                 {
-                    reference.Replace(RewriteAsComponent(node, node.TagHelpers.First(t => t.IsComponentTagHelper())));
+                    var tagHelper = node.TagHelpers.First(t => t.IsComponentTagHelper());
+                    if (tagHelper.IsTemplatedComponentPropTagHelper())
+                    {
+                        reference.Replace(RewriteAsComponentTemplateProp(node, tagHelper));
+                    }
+                    else
+                    {
+                        reference.Replace(RewriteAsComponent(node, tagHelper));
+                    }
                 }
                 else
                 {
@@ -62,7 +73,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             {
                 Component = tagHelper,
                 Source = node.Source,
-                TagName = node.TagName,
+                TagName = node.TagName
             };
 
             for (var i = 0; i < node.Diagnostics.Count; i++)
@@ -70,8 +81,93 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                 result.Diagnostics.Add(node.Diagnostics[i]);
             }
 
+            // we need to reorder, first TemplateComponentPropExtensionNode then others
+            //
+            // assume we have
+            //  1: <ComponentTemplateTest>
+            //  2:   <ComponentTemplateTest.Template>
+            //  3:       test simple template
+            //  4:   </ComponentTemplateTest.Template>
+            //  5:
+            //  6:   <ComponentTemplateTest.TemplateWithInt WithParams="param1">
+            //  7:       @param1
+            //  8:   </ComponentTemplateTest.TemplateWithInt>
+            //  9:
+            // 10:   <div>this is childcontent (1)</div>
+            // 11:   <div>this is childcontent (2)</div>
+            // 12: </ComponentTemplateTest>
+            //
+            // we need to move lines 10,11 on top of Children collection,
+            // cause ScopeStack.IncrementCurrentScopeChildCount currently need it on top
+            var firstChild = node.Children.FirstOrDefault();
+            if (firstChild != null)
+            {
+                var templatePropNodes = firstChild.Children.OfType<TemplateComponentAttributeExtensionNode>().ToList();
+                foreach (var propNode in templatePropNodes) firstChild.Children.Remove(propNode);
+                foreach (var propNode in templatePropNodes)
+                    firstChild.Children.Insert(firstChild.Children.Count, propNode); // must be the last, see ScopeStack.IncrementCurrentScopeChildCount
+
+                if (templatePropNodes.Count() != 0)
+                {
+                    // and also, remove all lines with only space, \n, \t, \r, stop first content found
+                    // (lines 5 and 9 on the example above will be removed)
+                    // cause if a BlazorComponent doesn't have ChildContent property we don't want to add the attribute
+                    // but if a line contains others values, we need to provide it (so they will not be removed)
+                    var htmlContent = firstChild.Children.OfType<HtmlContentIntermediateNode>().ToList();
+                    foreach (var htmlNode in htmlContent)
+                    {
+                        if( htmlNode.Children.OfType<IntermediateToken>().All(x => rxWS.Match(x.Content).Success) )
+                            firstChild.Children.Remove(htmlNode);
+                        else
+                            break;
+                    }
+
+                    foreach( var propNode in templatePropNodes)
+                    {
+                        if(templatePropNodes.Count(x=>x.TemplatePropName == propNode.TemplatePropName) >1 )
+                        {
+                            // only one properties!
+                            propNode.Diagnostics.Add(BlazorDiagnosticFactory.CreateRenderFragmentAttribute_Duplicates(
+                                propNode.Source,
+                                propNode.TemplatePropName));
+                        }
+                    }
+                }
+            }
+
             var visitor = new ComponentRewriteVisitor(result.Children);
             visitor.Visit(node);
+
+            return result;
+        }
+
+        private TemplateComponentAttributeExtensionNode RewriteAsComponentTemplateProp(TagHelperIntermediateNode node, TagHelperDescriptor tagHelper)
+        {
+            var result = new TemplateComponentAttributeExtensionNode()
+            {
+                Component = tagHelper,
+                Source = node.Source,
+                TagName = node.TagName,
+
+                TemplatePropName = tagHelper.GetTemplatedComponentPropNameTagHelper(),
+                TemplatePropTypeName = tagHelper.GetTemplatedComponentPropTypeNameTagHelper()
+            };
+
+            for (var i = 0; i < node.Diagnostics.Count; i++)
+            {
+                result.Diagnostics.Add(node.Diagnostics[i]);
+            }
+
+            var visitor = new TemplateComponentRewriteVisitor(result, result.Children);
+            visitor.Visit(node);
+
+            if (tagHelper.IsTemplatedComponentPropWithGenericsTagHelper() && string.IsNullOrEmpty(result.TemplatePropArgs))
+            {
+                // WithParams empty!
+                result.Diagnostics.Add(BlazorDiagnosticFactory.CreateWithParamsAttribute_MustDefined(
+                    result.Source,
+                    result.TemplatePropName));
+            }
 
             return result;
         }
@@ -177,6 +273,24 @@ namespace Microsoft.AspNetCore.Blazor.Razor
             public override void VisitDefault(IntermediateNode node)
             {
                 _children.Add(node);
+            }
+        }
+
+        private class TemplateComponentRewriteVisitor : ComponentRewriteVisitor
+        {
+            private TemplateComponentAttributeExtensionNode _component;
+
+            public TemplateComponentRewriteVisitor(TemplateComponentAttributeExtensionNode component, IntermediateNodeCollection children) : base(children)
+            {
+                _component = component;
+            }
+
+            public override void VisitTagHelperProperty(TagHelperPropertyIntermediateNode node)
+            {
+                if( node.AttributeName == Shared.BlazorApi.ITemplatedComponent.WithParamsAttibuteName )
+                {
+                    _component.TemplatePropArgs = node.FindDescendantNodes<IntermediateToken>()?.FirstOrDefault()?.Content;
+                }
             }
         }
 
