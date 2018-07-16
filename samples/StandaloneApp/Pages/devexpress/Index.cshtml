@@ -4,90 +4,131 @@
 
 Welcome to your new app.
 
-<DXButton text="@this.Text" hint="Example Hint"
-          type="@DXButton.ButtonType.success.ToString()"
-          icon="check"
-          onclick="@Clicked"></DXButton>
+<div>
+    @*<DXButton text="@this.Text" hint="Example Hint"
+              type="@DXButton.ButtonType.success.ToString()"
+              icon="check"
+              onclick="@Clicked"></DXButton>
 
-@*<div>
+    <div>
         <DXCalendar onValueChanged="@ValueChanged"></DXCalendar>
+    </div>
+
+    <DXColorBox onValueChanged="@ValueChanged"
+                          applyButtonText="apply button"
+                          disabled="@colorboxDisabled"></DXColorBox>
+    <DXButton text="Disable/Enable"
+              onclick="(x => { colorboxDisabled = !colorboxDisabled; this.StateHasChanged(); })"></DXButton>
+
+    <DXAccordion dataSource="this.listString">
+        <DXAccordion.itemTitleTemplate WithParams="item">
+            title @item.itemIndex @item.itemData
+        </DXAccordion.itemTitleTemplate>
+
+        <DXAccordion.itemTemplate WithParams="item2">
+            item @item2.itemIndex @item2.itemData
+            <DXCheckBox text="chk"></DXCheckBox>
+            <button onclick="@(x => remove(item2.itemIndex))">remove</button>
+        </DXAccordion.itemTemplate>
+    </DXAccordion>
+
+    <div>
+        check:
+        <DXCheckBox text="chk"></DXCheckBox>
     </div>*@
 
+    <DXList dataSource="this.listString" itemDeleteMode="@ItemDeleteMode.Toggle" allowItemDeleting="true">
+        <DXList.itemTemplate WithParams="item">
+            prova
+            <DXCheckBox text="chk"></DXCheckBox>
+            @item.itemData
+        </DXList.itemTemplate>
+    </DXList>
+
+    <DXLookUp dataSource="this.listString2" onOpened="onOpened">
+        <DXLookUp.itemTemplate WithParams="item">
+            test @item.itemData
+        </DXLookUp.itemTemplate>
+
+        <DXLookUp.titleTemplate>
+            this is the title
+        </DXLookUp.titleTemplate>
+    </DXLookUp>
+
+    <div>
+        <DXDateBox value="@data"
+                   onValueChanged="(x) => { this.SetData(System.DateTime.Parse((string)x.Value)); }"></DXDateBox>
+        @data
+    </div>
+</div>
+
 <div>
-    @*<DXColorBox onValueChanged="@ValueChanged"
-                    applyButtonText="apply button"
-                    disabled="@colorboxDisabled"></DXColorBox>
-        <DXButton text="Disable/Enable"
-                  onclick="(x => { colorboxDisabled = !colorboxDisabled; this.StateHasChanged(); })"></DXButton>*@
     <span disabled="@colorboxDisabled">
         @colorboxDisabled
     </span>
-
-    <DXAccordion dataSource="this.listString">
-        <itemTitleTemplate>
-            @{
-                var item = builder2_Param1 as StandaloneApp.DXTemplateItem;
-            }
-            title @item.itemIndex @item.itemData
-        </itemTitleTemplate>
-
-        <itemTemplate>
-            @{
-                var item2 = builder2_Param1 as StandaloneApp.DXTemplateItem;
-            }
-            item @item2.itemIndex @item2.itemData
-            <button onclick="@(x => remove(item2.itemIndex))">remove</button>
-        </itemTemplate>
-    </DXAccordion>
 </div>
 
-
-
 @functions {
-string Text = "Example Button";
-bool colorboxDisabled = true;
-List<string> listString;
+  string Text = "Example Button";
+  bool colorboxDisabled = true;
+  List<string> listString;
+  List<string> listString2;
+  System.DateTime data = System.DateTime.Now;
 
-protected override void OnInit()
-{
-    listString = new List<string>();
-    listString.Add("1");
-    listString.Add("2");
-    //listString.Add("3");
-    //listString.Add("4");
-    //listString.Add("5");
+  protected override void OnInit()
+  {
+      listString = new List<string>();
+      listString.Add("1");
+      listString.Add("2");
+      //listString.Add("3");
+      //listString.Add("4");
+      //listString.Add("5");
 
-    base.OnInit();
-}
 
-protected void remove(int index)
-{
-    listString.RemoveAt(index);
-    listString = new List<string>(listString);
+      base.OnInit();
+  }
 
-    this.StateHasChanged();
-}
+  protected void SetData(System.DateTime NewData)
+  {
+      this.data = NewData;
+      this.StateHasChanged();
+  }
 
-private int c = 1;
+  protected void remove(int index)
+  {
+      listString.RemoveAt(index);
+      listString = new List<string>(listString);
 
-protected void Clicked(UICustomEventArgs e)
-{
-    Text += " Clicked!";
-    Console.WriteLine($"Click! {e.Type} {e.Value}");
+      this.StateHasChanged();
+  }
 
-    // need to be immutable
-    listString = new List<string>(listString);
-    listString.Add($"{c++}xxx");
-    listString.Add($"{c++}xxx");
-    listString.Add($"{c++}xxx");
-    listString.Add($"{c++}xxx");
+  private int c = 1;
 
-    this.StateHasChanged();
-}
+  protected void Clicked(UICustomEventArgs e)
+  {
+      Text += " Clicked!";
+      Console.WriteLine($"Click! {e.Type} {e.Value}");
 
-protected void ValueChanged(UICustomEventArgs e)
-{
-    Console.WriteLine($"ValueChanged! {e.Type} {e.Value}");
-    this.StateHasChanged();
-}
+      // need to be immutable
+      listString = new List<string>(listString);
+      listString.Add($"{c++}xxx");
+      listString.Add($"{c++}xxx");
+      listString.Add($"{c++}xxx");
+      listString.Add($"{c++}xxx");
+
+      this.StateHasChanged();
+  }
+
+  protected void ValueChanged(UICustomEventArgs e)
+  {
+      Console.WriteLine($"ValueChanged! {e.Type} {e.Value}");
+      this.StateHasChanged();
+  }
+
+  protected void onOpened(UICustomEventArgs e)
+  {
+      Console.WriteLine("onOpened");
+      this.listString2 = this.listString;
+      this.StateHasChanged();
+  }
 }

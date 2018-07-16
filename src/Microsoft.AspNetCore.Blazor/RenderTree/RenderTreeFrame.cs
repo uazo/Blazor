@@ -81,7 +81,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
         /// If the <see cref="FrameType"/> property equals <see cref="RenderTreeFrameType.Attribute"/>,
         /// gets the attribute value in JSON format. Otherwise, the value is undefined.
         /// </summary>
-        [FieldOffset(12)] public readonly int AttributeValueJSON;
+        [FieldOffset(12)] public readonly string AttributeValueJSON;
 
         /// <summary>
         /// If the <see cref="FrameType"/> property equals <see cref="RenderTreeFrameType.Attribute"/>,
@@ -223,8 +223,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             if (serializeAsJson == true && AttributeValue != null)
             {
                 // We want to send JSON to BlazorComponent
-                AttributeValue = $"{JSInterop.Json.Serialize(AttributeValue)}";
-                AttributeValueJSON = 1;
+                AttributeValueJSON = $"{JSInterop.Json.Serialize(AttributeValue)}";
             }
         }
 
@@ -295,7 +294,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             => new RenderTreeFrame(Sequence, componentType: ComponentType, componentSubtreeLength: componentSubtreeLength);
 
         internal RenderTreeFrame WithAttributeSequence(int sequence)
-            => new RenderTreeFrame(sequence, attributeName: AttributeName, attributeValue: AttributeValue, AttributeValueJSON == 0 ? false : true);
+            => new RenderTreeFrame(sequence, attributeName: AttributeName, attributeValue: AttributeValue, AttributeValueJSON == null ? false : true);
 
         internal RenderTreeFrame WithComponentInstance(int componentId, IComponent component)
             => new RenderTreeFrame(Sequence, ComponentType, ComponentSubtreeLength, componentId, component);
