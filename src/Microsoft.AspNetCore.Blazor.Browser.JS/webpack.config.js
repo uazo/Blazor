@@ -31,7 +31,8 @@ module.exports = function (env, args) {
       }]
     },
     entry: {
-      'blazor.webassembly': './src/Boot.WebAssembly.ts',
+        'blazor.webassembly': './src/Boot.WebAssembly.ts',
+        'blazor.server': './src/Boot.Server.ts',
     },
     output: {
       path: path.join(__dirname, '/' + outputFolder), filename: '[name].js',
