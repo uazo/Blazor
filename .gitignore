@@ -13,3 +13,5 @@ BenchmarkDotNet.Artifacts/
 /src/anglesharp/AngleSharpBuilder/dist
 /src/Microsoft.AspNetCore.Blazor.Forms/node_modules
 /src/Microsoft.AspNetCore.Blazor.Browser.JS/package/blazor.js
+/src/Blazor.DX/node_modules
+/src/Blazor.DX/src/bundle.js

@@ -1,0 +1,8 @@
+[
+  {
+    "outputFileName": "src/bundle.min.js",
+    "inputFiles": [
+      "src/bundle.js"
+    ]
+  }
+]

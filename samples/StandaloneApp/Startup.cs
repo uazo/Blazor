@@ -4,6 +4,7 @@
 using Microsoft.AspNetCore.Blazor.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Blazor.Forms;
+using Blazor.DX;
 
 namespace StandaloneApp
 {
