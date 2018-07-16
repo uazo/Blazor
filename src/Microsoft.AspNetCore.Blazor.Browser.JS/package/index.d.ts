@@ -34,7 +34,7 @@ export class BrowserRenderer {
     disposeComponent(componentId: number): void;
     disposeEventHandler(eventHandlerId: number): void;
 }
-export function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>): void;
+export function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>): Promise<void>;
 
 export class BlazorDOMElement {
     protected readonly browserRenderer: BrowserRenderer;
@@ -43,6 +43,7 @@ export class BlazorDOMElement {
     getClosestDomElement(): Node;
     protected getDOMElement(): HTMLElement;
     getLogicalChild(childIndex: number): Node | BlazorDOMElement | null;
+    createElement(tagName: string, childIndex: number): Element;
     insertNodeIntoDOM(node: Node, childIndex: number): void;
     removeFromDom(childIndex?: number | null): void;
     updateText(childIndex: number, newText: string | null): void;
@@ -55,9 +56,10 @@ export class BlazorDOMElement {
     protected applyEvent(attributeName: string, componentId: number, eventHandlerId: number): boolean;
     onDOMUpdating(): void;
     onDOMUpdated(): void;
+    onChildAttached(child: BlazorDOMElement): void;
     dispose(): void;
 }
-export function getBlazorDomElement(container: Node): any;
+export function getBlazorDomElement(container: Node): BlazorDOMElement | null;
 
 export interface RenderBatch {
     updatedComponents(): ArrayRange<RenderTreeDiff>;
@@ -97,7 +99,7 @@ export interface RenderTreeEditReader {
 export interface RenderTreeFrameReader {
     frameType(frame: RenderTreeFrame): FrameType;
     subtreeLength(frame: RenderTreeFrame): number;
-    elementReferenceCaptureId(frame: RenderTreeFrame): number;
+    elementReferenceCaptureId(frame: RenderTreeFrame): string | null;
     componentId(frame: RenderTreeFrame): number;
     elementName(frame: RenderTreeFrame): string | null;
     textContent(frame: RenderTreeFrame): string | null;
@@ -105,6 +107,8 @@ export interface RenderTreeFrameReader {
     attributeValue(frame: RenderTreeFrame): string | null;
     attributeEventHandlerId(frame: RenderTreeFrame): number;
     customComponentType(frame: RenderTreeFrame): number;
+    hasAttributeValueJson(frame: RenderTreeFrame): boolean;
+    attributeValueJson(frame: RenderTreeFrame): string | null;
 }
 export interface ArrayRange<T> {
     ArrayRange__DO_NOT_IMPLEMENT: any;
