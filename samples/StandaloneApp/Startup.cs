@@ -20,6 +20,7 @@ namespace StandaloneApp
             app.AddDatePicker();
             app.AddGritter();
             app.AddDropZone();
+            app.AddDX();
         }
     }
 }
