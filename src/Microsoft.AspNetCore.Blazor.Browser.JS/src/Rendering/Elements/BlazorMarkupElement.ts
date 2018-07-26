@@ -15,7 +15,4 @@ export class BlazorMarkupElement extends BlazorDOMComponent {
     }
   }
 
-  public isComponent(): boolean {
-    return false;
-  }
 }

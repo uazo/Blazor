@@ -1,0 +1,43 @@
+@functions
+{
+  [Parameter]
+  public RenderFragment Template { get; set; }
+
+  [Parameter]
+  public RenderFragment<int> TemplateWithInt { get; set; }
+
+  [Parameter]
+  public RenderFragment<TestObject> TemplateWithObject { get; set; }
+
+  [Parameter]
+  public RenderFragment ChildContent { get; set; }
+ 
+  public class TestObject
+  {
+      public string PropString { get; set; } = string.Empty;
+      public int PropInt { get; set; }
+  }
+
+  private TestObject testobject = new TestObject();
+
+  void ClickMe()
+  {
+      this.testobject.PropInt++;
+      this.testobject.PropString += "Clicked! ";
+  }
+}
+
+<div>
+    <div>@ChildContent</div>
+    <div>--- templates ---</div>
+    <div><button onclick="@ClickMe">Click me</button></div>
+    <div>Simple Template: @Template</div>
+    <div>Template with parameter (int): @TemplateWithInt?.Render(testobject.PropInt)</div>
+
+    @*
+      This syntax works
+      @((RenderFragment)((x) => TemplateWithInt(x, testobject.PropInt)))
+    *@
+
+    <div>Template with object: @TemplateWithObject?.Render(testobject)</div>
+</div>

@@ -74,7 +74,7 @@ const editReader = {
 
 // Keep in sync with memory layout in RenderTreeFrame.cs
 const frameReader = {
-  structLength: 28,
+  structLength: 36,
   frameType: (frame: RenderTreeFrame) => platform.readInt16Field(frame as any, 4) as FrameType,
   subtreeLength: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 8),
   elementReferenceCaptureId: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 16),
@@ -86,8 +86,8 @@ const frameReader = {
   attributeValue: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 24),
   attributeEventHandlerId: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 8),
   customComponentType: (frame: RenderTreeFrame) => platform.readInt16Field(frame as any, 6),
-  hasAttributeValueJson: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 12) != 0,
-  attributeValueJson: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 12)
+  hasAttributeValueJson: (frame: RenderTreeFrame) => platform.readInt32Field(frame as any, 32) != 0,
+  attributeValueJson: (frame: RenderTreeFrame) => platform.readStringField(frame as any, 32)
 };
 
 function arrayValuesEntry<T>(arrayValues: ArrayValues<T>, index: number, itemSize: number): T {

@@ -15,44 +15,46 @@ namespace Blazor.DX
         /// </summary>
         public static IBlazorApplicationBuilder AddDX(this IBlazorApplicationBuilder services)
         {
+            //((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXTextAreaComponentId", id);
+
             int id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXButton));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXButtonComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXButtonComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXCalendar));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXCalendarComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXCalendarComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXColorBox));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXColorBoxComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXColorBoxComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXAccordion));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXAccordionComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXAccordionComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXTemplateRenderer));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXTemplateRendererComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXTemplateRendererComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXList));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXListComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXListComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXCheckBox));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXCheckBoxComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXCheckBoxComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXLookUp));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXLookupComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXLookupComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXDateBox));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXDateBoxComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXDateBoxComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXSwitch));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXSwitchComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXSwitchComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXDropDownBox));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXDropDownBoxComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXDropDownBoxComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXTextBox));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXTextBoxComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXTextBoxComponentId", id);
 
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXTextArea));
-            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXTextAreaComponentId", id);
+            JSRuntime.Current.InvokeAsync<bool>("RegisterDXTextAreaComponentId", id);
             return services;
         }
     }

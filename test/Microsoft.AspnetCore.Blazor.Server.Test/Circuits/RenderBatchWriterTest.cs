@@ -248,8 +248,17 @@ namespace Microsoft.AspNetCore.Blazor.Server
                 {
                     // Assume enums are represented as ints
                     var expectedEntry = expectedEntryIterationVar.GetType().IsEnum
-                        ? (int)expectedEntryIterationVar
+                        ? expectedEntryIterationVar
                         : expectedEntryIterationVar;
+
+                    if(expectedEntryIterationVar is Blazor.RenderTree.RenderTreeFrameType)
+                    {
+                        expectedEntry = (int)(Blazor.RenderTree.RenderTreeFrameType)expectedEntryIterationVar;
+                    }
+                    else if (expectedEntryIterationVar is Blazor.RenderTree.RenderTreeEditType)
+                    {
+                        expectedEntry = (int)(Blazor.RenderTree.RenderTreeEditType)expectedEntryIterationVar;
+                    }
 
                     if (expectedEntry is int expectedInt)
                     {

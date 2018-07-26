@@ -2,7 +2,7 @@ import { RenderBatch, ArrayRange, RenderTreeDiff, ArrayValues, RenderTreeEdit, E
 import { decodeUtf8 } from './Utf8Decoder';
 
 const updatedComponentsEntryLength = 4; // Each is a single int32 giving the location of the data
-const referenceFramesEntryLength = 16; // 1 byte for frame type, then 3 bytes for type-specific data
+const referenceFramesEntryLength = 20; // 1 byte for frame type, then 3 bytes for type-specific data
 const disposedComponentIdsEntryLength = 4; // Each is an int32 giving the ID
 const disposedEventHandlerIdsEntryLength = 4; // Each is an int32 giving the ID
 const editsEntryLength = 16; // 4 ints
@@ -45,7 +45,8 @@ export class OutOfProcessRenderBatch implements RenderBatch {
   }
 
   disposedComponentIdsEntry(values: ArrayValues<number>, index: number): number {
-    return (values as any) + index * disposedComponentIdsEntryLength;
+    const entryPos = (values as any) + index * disposedComponentIdsEntryLength;
+    return readInt32LE(this.batchData, entryPos);
   }
 
   disposedEventHandlerIdsEntry(values: ArrayValues<number>, index: number): number {
@@ -108,7 +109,7 @@ class OutOfProcessRenderTreeFrameReader implements RenderTreeFrameReader {
   // It's the caller's responsibility not to evaluate properties that aren't applicable to the frameType.
 
   frameType(frame: RenderTreeFrame) {
-    return readInt16LE(this.batchDataUint8, frame as any); // 1st int
+    return readInt32LE(this.batchDataUint8, frame as any); // 1st int
   }
 
   subtreeLength(frame: RenderTreeFrame) {
@@ -122,6 +123,10 @@ class OutOfProcessRenderTreeFrameReader implements RenderTreeFrameReader {
 
   componentId(frame: RenderTreeFrame) {
     return readInt32LE(this.batchDataUint8, frame as any + 8); // 3rd int
+  }
+
+  customComponentType(frame: RenderTreeFrame) {
+    return readInt32LE(this.batchDataUint8, frame as any + 12);
   }
 
   elementName(frame: RenderTreeFrame) {
@@ -150,19 +155,15 @@ class OutOfProcessRenderTreeFrameReader implements RenderTreeFrameReader {
   }
 
   attributeEventHandlerId(frame: RenderTreeFrame) {
-    return readInt16LE(this.batchDataUint8, frame as any + 6); // 4th int
-  }
-
-  customComponentType(frame: RenderTreeFrame) {
-    return readInt16LE(this.batchDataUint8, frame as any + 6);
+    return readInt32LE(this.batchDataUint8, frame as any + 12); // 4th int
   }
 
   hasAttributeValueJson(frame: RenderTreeFrame) {
-    return readInt32LE(this.batchDataUint8, frame as any + 8) != 0; 
+    return readInt32LE(this.batchDataUint8, frame as any + 16) != 0; 
   }
 
   attributeValueJson(frame: RenderTreeFrame) {
-    const stringIndex = readInt32LE(this.batchDataUint8, frame as any + 8);
+    const stringIndex = readInt32LE(this.batchDataUint8, frame as any + 16);
     return this.stringReader.readString(stringIndex);
   }
 }

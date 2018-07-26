@@ -154,38 +154,43 @@ namespace Microsoft.AspNetCore.Blazor.Server.Circuits
                         WriteString(frame.AttributeValue as string);
                     }
                     _binaryWriter.Write(frame.AttributeEventHandlerId);
+                    if( frame.AttributeValueJSON == null)
+                        WritePadding(_binaryWriter, 4);
+                    else
+                        WriteString(frame.AttributeValueJSON);
                     break;
                 case RenderTreeFrameType.Component:
                     _binaryWriter.Write(frame.ComponentSubtreeLength);
                     _binaryWriter.Write(frame.ComponentId);
+                    _binaryWriter.Write((int)frame.CustomComponentType);
                     WritePadding(_binaryWriter, 4);
                     break;
                 case RenderTreeFrameType.ComponentReferenceCapture:
                     // The client doesn't need to know about these. But we still have
                     // to include them in the array otherwise the ReferenceFrameIndex
                     // values in the edits data would be wrong.
-                    WritePadding(_binaryWriter, 12);
+                    WritePadding(_binaryWriter, 16);
                     break;
                 case RenderTreeFrameType.Element:
                     _binaryWriter.Write(frame.ElementSubtreeLength);
                     WriteString(frame.ElementName);
-                    WritePadding(_binaryWriter, 4);
+                    WritePadding(_binaryWriter, 8);
                     break;
                 case RenderTreeFrameType.ElementReferenceCapture:
                     WriteString(frame.ElementReferenceCaptureId);
-                    WritePadding(_binaryWriter, 8);
+                    WritePadding(_binaryWriter, 12);
                     break;
                 case RenderTreeFrameType.Region:
                     _binaryWriter.Write(frame.RegionSubtreeLength);
-                    WritePadding(_binaryWriter, 8);
+                    WritePadding(_binaryWriter, 12);
                     break;
                 case RenderTreeFrameType.Text:
                     WriteString(frame.TextContent);
-                    WritePadding(_binaryWriter, 8);
+                    WritePadding(_binaryWriter, 12);
                     break;
                 case RenderTreeFrameType.Markup:
                     WriteString(frame.MarkupContent);
-                    WritePadding(_binaryWriter, 8);
+                    WritePadding(_binaryWriter, 12);
                     break;
                 default:
                     throw new ArgumentException($"Unsupported frame type: {frame.FrameType}");

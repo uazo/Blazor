@@ -79,7 +79,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
 
         /// <summary>
         /// </summary>
-        [FieldOffset(12)] public readonly string AttributeValueJSON;
+        [FieldOffset(12)] public readonly bool HasAttributeValueJSON;
 
         /// <summary>
         /// If the <see cref="FrameType"/> property equals <see cref="RenderTreeFrameType.Attribute"/>,
@@ -88,20 +88,20 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
         [FieldOffset(16)] public readonly string AttributeName;
 
         /// <summary>
-        /// </summary>
-        [FieldOffset(20)] public readonly bool HasAttributeValueJSON;
-
-        /// <summary>
         /// If the <see cref="FrameType"/> property equals <see cref="RenderTreeFrameType.Attribute"/>,
         /// gets the attribute value. Otherwise, the value is undefined.
         /// </summary>
         [FieldOffset(24)] public readonly object AttributeValue;
 
+        /// <summary>
+        /// </summary>
+        [FieldOffset(32)] public readonly string AttributeValueJSON;
+
         // --------------------------------------------------------------------------------
         // RenderTreeFrameType.Component
         // --------------------------------------------------------------------------------
 
-				/// <summary>
+        /// <summary>
         /// Describes the custome registred type of this component.
         /// </summary>
         [FieldOffset(6)] public readonly short CustomComponentType;
@@ -309,7 +309,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
         internal static RenderTreeFrame Attribute(int sequence, string name, MulticastDelegate value)
              => new RenderTreeFrame(sequence, attributeName: name, attributeValue: value, attributeValueJSON: null, hasAttributeJSON: false);
 
-        internal static RenderTreeFrame Attribute(int sequence, string name, object value, bool hasValueAsJson)
+        internal static RenderTreeFrame Attribute(int sequence, string name, object value, bool hasValueAsJson = false)
             => new RenderTreeFrame(sequence, attributeName: name, attributeValue: value, attributeValueJSON: null, hasAttributeJSON: hasValueAsJson);
 
         internal static RenderTreeFrame ChildComponent(int sequence, Type componentType)

@@ -1,0 +1,33 @@
+@page "/component-test"
+
+<h1>Templated TEST</h1>
+
+<ComponentTemplateTest>
+    <ComponentTemplateTest.Template>
+        test simple template
+    </ComponentTemplateTest.Template>
+
+    <ComponentTemplateTest.TemplateWithInt WithParams="param1">
+        @param1
+    </ComponentTemplateTest.TemplateWithInt>
+
+    <ComponentTemplateTest.TemplateWithObject WithParams="paramObject">
+        <div>
+            propint = @paramObject.PropInt
+        </div>
+        <div>
+            PropString = @paramObject.PropString
+        </div>
+    </ComponentTemplateTest.TemplateWithObject>
+
+    <div>this is childcontent (1)</div>
+    <div>this is childcontent (2)</div>
+</ComponentTemplateTest>
+
+<br /><br />
+
+<ComponentTemplateTest2>
+    <ComponentTemplateTest2.RowTemplate WithParams="x">
+        @x.PropInt -- @x.PropString
+    </ComponentTemplateTest2.RowTemplate>
+</ComponentTemplateTest2>

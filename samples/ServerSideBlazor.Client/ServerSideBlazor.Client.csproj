@@ -6,8 +6,28 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\Blazor.DX\Blazor.DX.csproj" />
         <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Browser\Microsoft.AspNetCore.Blazor.Browser.csproj" />
+        <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor.Forms\Microsoft.AspNetCore.Blazor.Forms.csproj" />
         <ProjectReference Include="..\..\src\Microsoft.AspNetCore.Blazor\Microsoft.AspNetCore.Blazor.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="Pages\devexpress\Index.cshtml">
+        <Pack>$(IncludeRazorContentInPack)</Pack>
+      </Content>
+      <Content Update="Pages\FormTest.cshtml">
+        <Pack>$(IncludeRazorContentInPack)</Pack>
+      </Content>
+      <Content Update="Pages\testtemplated\ComponentTemplateTest.cshtml">
+        <Pack>$(IncludeRazorContentInPack)</Pack>
+      </Content>
+      <Content Update="Pages\testtemplated\ComponentTemplateTest2.cshtml">
+        <Pack>$(IncludeRazorContentInPack)</Pack>
+      </Content>
+      <Content Update="Pages\testtemplated\test.cshtml">
+        <Pack>$(IncludeRazorContentInPack)</Pack>
+      </Content>
     </ItemGroup>
 
     <!-- Local alternative to <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" /> -->

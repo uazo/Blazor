@@ -19,6 +19,10 @@
     <ItemGroup>
         <EmbeddedResource Include="src\bundle.js" LogicalName="blazor:js:blazor.dx.bundle.js" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="dist\" />
+    </ItemGroup>
     
 
     <Target Name="RunWebpack" AfterTargets="BeforeBuild">
