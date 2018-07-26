@@ -1217,7 +1217,17 @@ namespace SimpleJson
         {
             get
             {
-                return _pocoJsonSerializerStrategy ?? (_pocoJsonSerializerStrategy = new PocoJsonSerializerStrategy());
+                return _pocoJsonSerializerStrategy ?? (_pocoJsonSerializerStrategy = new PocoJsonSerializerStrategy(true));
+            }
+        }
+
+        private static PocoJsonSerializerStrategy _pocoJsonSerializerStrategyNoCamelCase;
+        /// <summary></summary>
+        public static PocoJsonSerializerStrategy PocoJsonSerializerStrategyNoCamelCase
+        {
+            get
+            {
+                return _pocoJsonSerializerStrategyNoCamelCase ?? (_pocoJsonSerializerStrategyNoCamelCase = new PocoJsonSerializerStrategy(false));
             }
         }
 
@@ -1235,7 +1245,7 @@ namespace SimpleJson
 
 #endif
     }
-    
+
     [GeneratedCode("simple-json", "1.0.0")]
 #if SIMPLE_JSON_INTERNAL
     internal
@@ -1271,8 +1281,12 @@ namespace SimpleJson
                                                                  @"yyyy-MM-dd\THH:mm:ssK"
                                                              };
 
-        public PocoJsonSerializerStrategy()
+        private bool _camelCase;
+
+        /// <summary></summary>
+        public PocoJsonSerializerStrategy(bool camelCase)
         {
+            _camelCase = camelCase;
             ConstructorCache = new ReflectionUtils.ThreadSafeDictionary<Type, ReflectionUtils.ConstructorDelegate>(ConstructorDelegateFactory);
             GetCache = new ReflectionUtils.ThreadSafeDictionary<Type, IDictionary<string, ReflectionUtils.GetDelegate>>(GetterValueFactory);
             SetCache = new ReflectionUtils.ThreadSafeDictionary<Type, IDictionary<string, KeyValuePair<Type, ReflectionUtils.SetDelegate>>>(SetterValueFactory);
@@ -1280,7 +1294,10 @@ namespace SimpleJson
 
         protected virtual string MapClrMemberNameToJsonFieldName(string clrPropertyName)
         {
-            return CamelCase.MemberNameToCamelCase(clrPropertyName);
+            if (_camelCase == true)
+                return CamelCase.MemberNameToCamelCase(clrPropertyName);
+            else
+                return clrPropertyName;
         }
 
         internal virtual ReflectionUtils.ConstructorDelegate ConstructorDelegateFactory(Type key)

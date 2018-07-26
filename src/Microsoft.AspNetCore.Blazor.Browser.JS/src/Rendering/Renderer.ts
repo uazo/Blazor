@@ -34,12 +34,14 @@ export function renderBatch(browserRendererId: number, batch: RenderBatch) {
   const referenceFramesValues = arrayRangeReader.values(referenceFrames);
   const diffReader = batch.diffReader;
 
+  browserRenderer.beginRender();
   for (let i = 0; i < updatedComponentsLength; i++) {
     const diff = batch.updatedComponentsEntry(updatedComponentsValues, i);
     const componentId = diffReader.componentId(diff);
     const edits = diffReader.edits(diff);
     browserRenderer.updateComponent(batch, componentId, edits, referenceFramesValues);
   }
+  browserRenderer.endRender();
 
   const disposedComponentIdsRange = batch.disposedComponentIds();
   const disposedComponentIdsValues = arrayRangeReader.values(disposedComponentIdsRange);

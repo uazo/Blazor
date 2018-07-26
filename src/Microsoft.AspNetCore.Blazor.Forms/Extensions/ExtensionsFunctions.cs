@@ -36,5 +36,11 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
             foreach (var attr in attrs)
                 builder.AddAttribute(sequence++, attr.Key, attr.Value);
         }
-	}
+
+        internal static void WriteHtmlAttributes(this RenderTreeBuilder builder, ref int sequence, Dictionary<string, object> attrs)
+        {
+            foreach (var attr in attrs)
+                builder.AddAttribute(sequence++, attr.Key, attr.Value);
+        }
+    }
 }

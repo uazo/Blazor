@@ -120,13 +120,13 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             AssertCanAddAttribute();
             if (_lastNonAttributeFrameType == RenderTreeFrameType.Component)
             {
-                Append(RenderTreeFrame.Attribute(sequence, name, value ? BoxedTrue : BoxedFalse));
+                Append(RenderTreeFrame.Attribute(sequence, name, value ? BoxedTrue : BoxedFalse, true));
             }
             else if (value)
             {
                 // Don't add 'false' attributes for elements. We want booleans to map to the presence
                 // or absence of an attribute, and false => "False" which isn't falsy in js.
-                Append(RenderTreeFrame.Attribute(sequence, name, BoxedTrue));
+                Append(RenderTreeFrame.Attribute(sequence, name, BoxedTrue, false));
             }
         }
 
@@ -147,7 +147,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             AssertCanAddAttribute();
             if (value != null || _lastNonAttributeFrameType == RenderTreeFrameType.Component)
             {
-                Append(RenderTreeFrame.Attribute(sequence, name, value));
+                Append(RenderTreeFrame.Attribute(sequence, name, value, false));
             }
         }
 
@@ -271,28 +271,29 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                 {
                     if (boolValue)
                     {
-                        Append(RenderTreeFrame.Attribute(sequence, name, BoxedTrue));
+                        Append(RenderTreeFrame.Attribute(sequence, name, BoxedTrue, false));
                     }
-
                     // Don't add anything for false bool value.
                 }
                 else if (value is MulticastDelegate)
                 {
-                    Append(RenderTreeFrame.Attribute(sequence, name, value));
+                    Append(RenderTreeFrame.Attribute(sequence, name, value, false));
                 }
                 else
                 {
                     // The value is either a string, or should be treated as a string.
-                    Append(RenderTreeFrame.Attribute(sequence, name, value.ToString()));
+                    Append(RenderTreeFrame.Attribute(sequence, name, value.ToString(), false));
                 }
             }
             else if (_lastNonAttributeFrameType == RenderTreeFrameType.Component)
             {
-                bool SerializeJson = false;
-                if( _lastCustomComponentType.HasValue && _lastCustomComponentType != 0 &&
-                    value != null && value.GetType().IsPrimitive == false)
-                    SerializeJson = true;
-                Append(RenderTreeFrame.Attribute(sequence, name, value, SerializeJson));
+                bool serializeJson = false;
+                if( _lastCustomComponentType.HasValue && _lastCustomComponentType != 0
+                    && value != null && !(value is MulticastDelegate))
+                {
+                    serializeJson = true;
+                }
+                Append(RenderTreeFrame.Attribute(sequence, name, value, serializeJson));
             }
             else
             {

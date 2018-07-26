@@ -108,14 +108,14 @@ namespace Microsoft.JSInterop
                     suppliedArgs[i], parameterTypes[i]);
             }
 
-            try
-            {
+            //try
+            //{
                 return methodInfo.Invoke(null, suppliedArgs);
-            }
-            catch (Exception ex)
-            {
-                throw UnwrapException(ex);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw UnwrapException(ex);
+            //}
         }
 
         /// <summary>

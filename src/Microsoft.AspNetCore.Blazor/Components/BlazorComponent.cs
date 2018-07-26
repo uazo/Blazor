@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Blazor.Components
     /// Optional base class for Blazor components. Alternatively, Blazor components may
     /// implement <see cref="IComponent"/> directly.
     /// </summary>
-    public abstract class BlazorComponent : IComponent, IHandleEvent, IHandleAfterRender
+    public abstract partial class BlazorComponent : IComponent, IHandleEvent, IHandleAfterRender
     {
         /// <summary>
         /// Specifies the name of the <see cref="RenderTree"/>-building method.
@@ -104,8 +104,7 @@ namespace Microsoft.AspNetCore.Blazor.Components
         {
             if (_hasPendingQueuedRender)
             {
-                BeginNewRendering();
-                //return;
+                return;
             }
 
             if (_hasNeverRendered || ShouldRender())

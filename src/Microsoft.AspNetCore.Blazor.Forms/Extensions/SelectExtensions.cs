@@ -43,10 +43,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 {
                     builder.AddAttribute(sequence++, "value", currentValue?.ToString());
                 }
-                builder.AddAttribute(sequence++, "onchange", new Action<UIChangeEventArgs>((e) =>
-                {
-                    model.SetValue(property.Name, property.PropertyType, e.Value);
-                }));
+                builder.AddAttribute(sequence++, "onchange", model.OnChanged(property.Name, property.PropertyType));
 
                 builder.WriteHtmlAttributes(ref sequence, htmlAttributes);
 

@@ -78,8 +78,6 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
         [FieldOffset(8)] public readonly int AttributeEventHandlerId;
 
         /// <summary>
-        /// If the <see cref="FrameType"/> property equals <see cref="RenderTreeFrameType.Attribute"/>,
-        /// gets the attribute value in JSON format. Otherwise, the value is undefined.
         /// </summary>
         [FieldOffset(12)] public readonly string AttributeValueJSON;
 
@@ -88,6 +86,10 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
         /// gets the attribute name. Otherwise, the value is undefined.
         /// </summary>
         [FieldOffset(16)] public readonly string AttributeName;
+
+        /// <summary>
+        /// </summary>
+        [FieldOffset(20)] public readonly bool HasAttributeValueJSON;
 
         /// <summary>
         /// If the <see cref="FrameType"/> property equals <see cref="RenderTreeFrameType.Attribute"/>,
@@ -212,19 +214,30 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             TextContent = textContent;
         }
 
-        private RenderTreeFrame(int sequence, string attributeName, object attributeValue, bool serializeAsJson)
+        private RenderTreeFrame(int sequence, string attributeName, object attributeValue, string attributeValueJSON, bool hasAttributeJSON)
             : this()
         {
             FrameType = RenderTreeFrameType.Attribute;
             Sequence = sequence;
             AttributeName = attributeName;
             AttributeValue = attributeValue;
+            AttributeValueJSON = attributeValueJSON;
+            HasAttributeValueJSON = hasAttributeJSON;
+        }
 
-            if (serializeAsJson == true && AttributeValue != null)
+        internal RenderTreeFrame ToRender()
+        {
+            // if the attribute is for a component, we need to
+            // send a json value (for ex. int need to be int)
+            // but no camel case
+            if ( this.HasAttributeValueJSON )
             {
-                // We want to send JSON to BlazorComponent
-                AttributeValueJSON = $"{JSInterop.Json.Serialize(AttributeValue)}";
+                if (this.AttributeValueJSON != null) return this;
+
+                var json = JSInterop.Json.SerializeNoCamelCase(AttributeValue);
+                return new RenderTreeFrame(Sequence, AttributeName, AttributeValue, json, true);
             }
+            return this;
         }
 
         private RenderTreeFrame(int sequence, string attributeName, object attributeValue, int eventHandlerId)
@@ -235,6 +248,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             AttributeName = attributeName;
             AttributeValue = attributeValue;
             AttributeEventHandlerId = eventHandlerId;
+            AttributeValueJSON = null;
         }
 
         private RenderTreeFrame(int sequence, int regionSubtreeLength)
@@ -270,10 +284,10 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             => new RenderTreeFrame(sequence, textContent: textContent);
 
         internal static RenderTreeFrame Attribute(int sequence, string name, MulticastDelegate value)
-             => new RenderTreeFrame(sequence, attributeName: name, attributeValue: value, false);
+             => new RenderTreeFrame(sequence, attributeName: name, attributeValue: value, attributeValueJSON: null, hasAttributeJSON: false);
 
-        internal static RenderTreeFrame Attribute(int sequence, string name, object value, bool serializeAsJson = false)
-            => new RenderTreeFrame(sequence, attributeName: name, attributeValue: value, serializeAsJson: serializeAsJson);
+        internal static RenderTreeFrame Attribute(int sequence, string name, object value, bool hasValueAsJson)
+            => new RenderTreeFrame(sequence, attributeName: name, attributeValue: value, attributeValueJSON: null, hasAttributeJSON: hasValueAsJson);
 
         internal static RenderTreeFrame ChildComponent(int sequence, Type componentType)
             => new RenderTreeFrame(sequence, componentType, 0);
@@ -294,7 +308,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             => new RenderTreeFrame(Sequence, componentType: ComponentType, componentSubtreeLength: componentSubtreeLength);
 
         internal RenderTreeFrame WithAttributeSequence(int sequence)
-            => new RenderTreeFrame(sequence, attributeName: AttributeName, attributeValue: AttributeValue, AttributeValueJSON == null ? false : true);
+            => new RenderTreeFrame(sequence, attributeName: AttributeName, attributeValue: AttributeValue, attributeValueJSON: AttributeValueJSON, hasAttributeJSON: HasAttributeValueJSON);
 
         internal RenderTreeFrame WithComponentInstance(int componentId, IComponent component)
             => new RenderTreeFrame(Sequence, ComponentType, ComponentSubtreeLength, componentId, component);

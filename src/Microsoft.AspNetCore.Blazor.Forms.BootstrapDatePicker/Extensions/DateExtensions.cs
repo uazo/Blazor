@@ -41,11 +41,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 builder.AddAttribute(sequence++, "HtmlAttributes", htmlAttributes);
                 builder.AddAttribute(sequence++, "Format", Format);
 
-                builder.AddAttribute(sequence++, "onchange",
-                    Blazor.Components.BindMethods.GetEventHandlerValue<UICustomEventArgs>( (e) =>
-                {
-                    model.SetValue( property, e.Value);
-                }));
+                builder.AddAttribute(sequence++, "onchange", model.OnChanged(property.Name, property.PropertyType));
 
                 builder.CloseComponent();
             };

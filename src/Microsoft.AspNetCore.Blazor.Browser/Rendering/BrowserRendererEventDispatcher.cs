@@ -56,13 +56,30 @@ namespace Microsoft.AspNetCore.Blazor.Browser.Rendering
                     return Json.Deserialize<UIEventArgs>(eventArgsJson);
                 case "wheel":
                     return Json.Deserialize<UIWheelEventArgs>(eventArgsJson);
-								case "custom":
-										return Json.Deserialize<UICustomEventArgs>(eventArgsJson);
-
-                default:
-                     throw new ArgumentException($"Unsupported value '{eventArgsType}'.", nameof(eventArgsType));
             }
+
+            _registeredUIEventType.TryGetValue(eventArgsType, out var customEventType);
+            if( customEventType != null )
+            {
+                return (UIEventArgs)Json.DeserializeObject(eventArgsJson, customEventType);
+            }
+
+            if( eventArgsType.StartsWith("custom"))
+                return Json.Deserialize<UICustomEventArgs>(eventArgsJson);
+            else
+                throw new ArgumentException($"Unsupported value '{eventArgsType}'.", nameof(eventArgsType));
         }
+
+        /// <summary>
+        /// Register a new UIEventType of type argsType
+        /// </summary>
+        public static void RegisterUIEventType<T>( string argsType ) where T: UICustomEventArgs
+        {
+            if( _registeredUIEventType.ContainsKey(argsType) == false)
+                _registeredUIEventType.Add(argsType, typeof(T));
+        }
+
+        static System.Collections.Generic.Dictionary<string, Type> _registeredUIEventType = new System.Collections.Generic.Dictionary<string, Type>();
 
         /// <summary>
         /// For framework use only.

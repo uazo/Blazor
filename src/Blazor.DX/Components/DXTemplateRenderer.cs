@@ -30,40 +30,35 @@ namespace Blazor.DX
 
             //Console.WriteLine($"{templateRegistryID} templateItemCount ={registry.templateItems.Count}");
             int sequence = 1;
-            for (int t = 0; t != registry.templateItemCount; t++)
+            foreach(var key in registry.templateItems.Keys)
             {
                 builder.OpenElement(sequence++, "div");
+                builder.AddAttribute(sequence++, "btplid", key);
                 //Console.WriteLine($"{templateName} {t} {registry.templateItems.ContainsKey(t)}");
-                if (registry.templateItems.ContainsKey(t))
-                {
-                    var item = registry.templateItems[t];
+                var item = registry.templateItems[key];
 
-                    builder.AddAttribute(sequence++, "item", item._Version);
-                    if (registry.itemSimpleTemplate != null)
-                    {
-                        builder.AddContent(sequence++, (RenderFragment)(builder3 => registry.itemSimpleTemplate.Invoke(builder3)));
-                    }
-                    else
-                    {
-                        builder.AddContent(sequence++, (RenderFragment)(builder3 => registry.itemTemplate?.Invoke(builder3, item)));
-                    }
+                //builder.AddAttribute(sequence++, "item", item._Version);
+                if (registry.itemSimpleTemplate != null)
+                {
+                    builder.AddContent(sequence++, RenderSimpleTemplate(registry));
                 }
                 else
                 {
-                    builder.AddAttribute(sequence++, "item", 0);
+                    builder.AddContent(sequence++, RenderItemTemplate(registry, item));
                 }
                 builder.CloseElement();
             }
         }
 
-        //protected override void StateHasChanged()
-        //{
-        //    Console.WriteLine("DXTemplateRenderer StateHasChanged");
-        //    base.BuildRenderTree(null);
-        //    base.StateHasChanged();
-        //}
+        private static RenderFragment RenderSimpleTemplate(DXTemplateRegistry registry)
+            => (RenderFragment)(builder3 => registry.itemSimpleTemplate.Invoke(builder3));
 
-        internal static void RenderDXTemplate(RenderTreeBuilder builder,
+        private static RenderFragment RenderItemTemplate(DXTemplateRegistry registry, DXTemplateItem item)
+            => (RenderFragment)(builder3 => registry.itemTemplate?.Invoke(builder3, item));
+
+        internal static void RenderDXTemplate(
+            BlazorComponent component,
+            RenderTreeBuilder builder,
             ref int sequence,
             string templateName,
             int templateRegistryID)
@@ -71,21 +66,38 @@ namespace Blazor.DX
             builder.OpenComponent<DXTemplateRenderer>(sequence++);
             builder.AddAttribute(sequence++, "templateName", templateName);
             builder.AddAttribute(sequence++, "templateRegistryID", templateRegistryID);
-            builder.AddAttribute(sequence++, "onRenderTemplate", (evt) =>
-            {
-                UICustomEventArgs args = evt as UICustomEventArgs;
-                DXTemplateItem item;
+            builder.AddAttribute(sequence++, "onRenderTemplate",
+                component.Action( $"onRenderTemplate_{templateRegistryID}",
+                (evt, x) =>
+                {
+                    UICustomEventArgs args = evt as UICustomEventArgs;
+                    DXTemplateItem item;
 
-                if (string.IsNullOrWhiteSpace((string)args.Value))
-                    item = new DXTemplateItem();
-                else
-                    item = Json.Deserialize<DXTemplateItem>((string)args.Value);
+                    if (string.IsNullOrWhiteSpace((string)args.Value))
+                        item = new DXTemplateItem();
+                    else
+                        item = Json.Deserialize<DXTemplateItem>((string)args.Value);
 
-                var registry = DXTemplateRegistry.Find(templateRegistryID);
-                item._Version++;
-                registry.templateItems[item.itemIndex] = item;
-                //Console.WriteLine($"onRenderTemplate {templateName} {item.itemIndex} {registry.templateItems.Count}");
-            });
+                    var registry = DXTemplateRegistry.Find(templateRegistryID);
+                    item._Version++;
+                    registry.templateItems[item.itemIndex] = item;
+                    //Console.WriteLine($"onRenderTemplate {templateName} {item.itemIndex} {registry.templateItems.Count}");
+                }));
+            //builder.AddAttribute(sequence++, "onRenderTemplate", (evt) =>
+            //{
+            //    UICustomEventArgs args = evt as UICustomEventArgs;
+            //    DXTemplateItem item;
+
+            //    if (string.IsNullOrWhiteSpace((string)args.Value))
+            //        item = new DXTemplateItem();
+            //    else
+            //        item = Json.Deserialize<DXTemplateItem>((string)args.Value);
+
+            //    var registry = DXTemplateRegistry.Find(templateRegistryID);
+            //    item._Version++;
+            //    registry.templateItems[item.itemIndex] = item;
+            //    //Console.WriteLine($"onRenderTemplate {templateName} {item.itemIndex} {registry.templateItems.Count}");
+            //});
 
             builder.CloseComponent();
         }
@@ -97,8 +109,8 @@ namespace Blazor.DX
         /// <summary></summary>
         internal Dictionary<int, DXTemplateItem> templateItems { get; set; } = new Dictionary<int, DXTemplateItem>();
 
-        /// <summary></summary>
-        internal int templateItemCount { get; set; }
+        ///// <summary></summary>
+        //internal int templateItemCount { get; set; }
 
         /// <summary></summary>
         internal RenderFragment<DXTemplateItem> itemTemplate { get; set; }
@@ -115,7 +127,7 @@ namespace Blazor.DX
             set
             {
                 _itemSimpleTemplate = value;
-                Clear(0);
+                Clear();
             }
         }
 
@@ -125,7 +137,7 @@ namespace Blazor.DX
 
         internal static int Create(DXTemplateRegistry obj)
         {
-            obj.Clear(0);
+            obj.Clear();
             __list.Add(__id, obj);
             return __id++;
         }
@@ -137,12 +149,18 @@ namespace Blazor.DX
             return __list[templateRegistryID];
         }
 
-        internal void Clear(int _templateItemCount)
+        internal void Clear()
         {
+            templateItems.Clear();
+
             if (itemSimpleTemplate != null)
-                templateItemCount = 1;
-            else
-                templateItemCount = _templateItemCount;
+                templateItems.Add(0, new DXTemplateItem());
+        }
+
+        internal static void DisposeDXTemplate(int itemTemplateId)
+        {
+            if (__list.ContainsKey(itemTemplateId))
+                __list.Remove(itemTemplateId);
         }
     }
 

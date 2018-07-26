@@ -65,7 +65,10 @@ export const monoPlatform: Platform = {
       }
       Module.setValue(exceptionFlagManagedInt, 0, 'i32');
 
+      let t0 = performance.now();
       const res = invoke_method(method, target, argsBuffer, exceptionFlagManagedInt);
+      let t1 = performance.now();
+      console.log("mono callMethod took " + (t1 - t0) + " milliseconds.")
 
       if (Module.getValue(exceptionFlagManagedInt, 'i32') !== 0) {
         // If the exception flag is set, the returned value is exception.ToString()

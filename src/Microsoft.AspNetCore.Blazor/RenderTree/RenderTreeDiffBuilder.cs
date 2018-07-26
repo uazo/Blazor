@@ -461,6 +461,9 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                 {
                     diffContext.BatchBuilder.DisposedEventHandlerIds.Append(oldFrame.AttributeEventHandlerId);
                 }
+                // we need to replace the attribute frame if
+                // it contains a JSON value, that need to be evaluated
+                newFrame = newFrame.ToRender();
                 InitializeNewAttributeFrame(ref diffContext, ref newFrame);
                 var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
                 if (isComponent && newFrame.AttributeValue is bool && (bool)newFrame.AttributeValue == false)
@@ -488,6 +491,9 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             {
                 case RenderTreeFrameType.Attribute:
                     {
+                        // we need to replace the attribute frame if
+                        // it contains a JSON value, that need to be evaluated
+                        newFrame = newFrame.ToRender();
                         InitializeNewAttributeFrame(ref diffContext, ref newFrame);
                         var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
                         diffContext.Edits.Append(RenderTreeEdit.SetAttribute(diffContext.SiblingIndex, referenceFrameIndex));
@@ -617,6 +623,10 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                         InitializeNewComponentFrame(ref diffContext, i);
                         break;
                     case RenderTreeFrameType.Attribute:
+                        // we need to replace the attribute frame if
+                        // it contains a JSON value, that need to be evaluated
+                        frames[i] = frame.ToRender();
+                        frame = ref frames[i];
                         InitializeNewAttributeFrame(ref diffContext, ref frame);
                         break;
                     case RenderTreeFrameType.ElementReferenceCapture:

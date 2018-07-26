@@ -244,13 +244,16 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
             // Text node
             var content = GetHtmlContent(node);
-            _scopeStack.IncrementCurrentScopeChildCount(context);
-            context.CodeWriter
-                .WriteStartMethodInvocation($"{_scopeStack.BuilderVarName}.{nameof(BlazorApi.RenderTreeBuilder.AddContent)}")
-                .Write((_sourceSequence++).ToString())
-                .WriteParameterSeparator()
-                .WriteStringLiteral(content)
-                .WriteEndMethodInvocation();
+            if (string.IsNullOrWhiteSpace(content.Replace("\n", "").Replace("\t", "").Replace("\r", "")) == false)
+            {
+                _scopeStack.IncrementCurrentScopeChildCount(context);
+                context.CodeWriter
+                    .WriteStartMethodInvocation($"{_scopeStack.BuilderVarName}.{nameof(BlazorApi.RenderTreeBuilder.AddContent)}")
+                    .Write((_sourceSequence++).ToString())
+                    .WriteParameterSeparator()
+                    .WriteStringLiteral(content)
+                    .WriteEndMethodInvocation();
+            }
         }
 
         public override void WriteUsingDirective(CodeRenderingContext context, UsingDirectiveIntermediateNode node)

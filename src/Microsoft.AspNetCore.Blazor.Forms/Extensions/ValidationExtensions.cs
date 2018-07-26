@@ -28,11 +28,11 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
           object htmlAttributes = null,
           Rendering.ICustomValidationMessage customValidationMessage = null)
         {
-            var property = PropertyHelper<T>.GetProperty(Field);
-            var name = property.Name;
-
             return (builder) =>
             {
+                var property = PropertyHelper<T>.GetProperty(Field);
+                var name = property.Name;
+
                 string errorDescription = model.GetValidationResults()?
                     .Where(x => ((IEnumerable<string>)x.MemberNames).Contains(name))
                     .Select(x => x.ErrorMessage)

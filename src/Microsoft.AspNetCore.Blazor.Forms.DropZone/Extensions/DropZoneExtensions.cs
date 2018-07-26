@@ -59,9 +59,9 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 
             /// <summary>
             /// </summary>
-            internal protected virtual void InvokeOnFileAdded<T>(Form<T> form, System.Reflection.PropertyInfo Property, DropZone.FileEventArgs args)
+            internal protected virtual void InvokeOnFileAdded<T>(ModelStateDictionary<T> model, System.Reflection.PropertyInfo Property, DropZone.FileEventArgs args)
             {
-                form.ModelState.SetValue(Property, args.Guid);
+                model.SetValue(Property, args.Guid);
                 OnFileAdded?.Invoke(Property.Name, args);
             }
 
@@ -71,27 +71,28 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 
             /// <summary>
             /// </summary>
-            internal protected virtual void InvokeOnFileRemoved<T>(Form<T> form, System.Reflection.PropertyInfo Property, DropZone.FileEventArgs args)
+            internal protected virtual void InvokeOnFileRemoved<T>(ModelStateDictionary<T> model, System.Reflection.PropertyInfo Property, DropZone.FileEventArgs args)
             {
-                if( form.ModelState.RemoveValue(Property) == false)
-                    form.ModelState.SetValue(Property, null);
+                if( model.RemoveValue(Property) == false)
+                    model.SetValue(Property, null);
 
                 OnFileRemoved?.Invoke(Property.Name, args);
             }
         }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="V"></typeparam>
-        /// <param name="form"></param>
-        /// <param name="Field"></param>
-        /// <param name="options"></param>
-        /// <param name="htmlAttributes"></param>
-        /// <returns></returns>
         public static Microsoft.AspNetCore.Blazor.RenderFragment DropZoneFor<T, V>(
-          this Microsoft.AspNetCore.Blazor.Forms.Form<T> form,
+            this Microsoft.AspNetCore.Blazor.Forms.Form<T> form,
+            Expression<Func<T, V>> Field,
+            DropZoneOptions options = null,
+            object htmlAttributes = null) => form.ModelState.DropZoneFor(Field, options, htmlAttributes);
+
+
+        /// <summary>
+        /// </summary>
+        public static Microsoft.AspNetCore.Blazor.RenderFragment DropZoneFor<T, V>(
+          this ModelStateDictionary<T> model,
           Expression<Func<T, V>> Field,
           DropZoneOptions options = null,
           object htmlAttributes = null)
@@ -99,7 +100,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
             if (options == null) options = new DropZoneOptions();
 
             var property = Extensions.PropertyHelper<T>.GetProperty(Field);
-            string currentValue = form.ModelState.GetValue(property)?.ToString();
+            string currentValue = model.GetValue(property)?.ToString();
             //Console.WriteLine($"currentValue={currentValue}");
 
             return (builder) =>
@@ -113,19 +114,21 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 builder.AddAttribute(sequence++, "MaxFiles", options.MaxFiles);
                 builder.AddAttribute(sequence++, "Value", currentValue == null ? string.Empty : currentValue);
 
-                builder.AddAttribute(sequence++, "onfileadded", args =>
-                {
-                    var customArgs = args as UICustomEventArgs;
-                    var fileArgs = Json.Deserialize<Components.DropZone.FileEventArgs>((string)customArgs.Value);
-                    options.InvokeOnFileAdded(form, property, fileArgs);
-                });
+                builder.AddAttribute(sequence++, "onfileadded",
+                    model.OnAction($"onfileadded_{property}", args =>
+                    {
+                        var customArgs = args as UICustomEventArgs;
+                        var fileArgs = Json.Deserialize<Components.DropZone.FileEventArgs>((string)customArgs.Value);
+                        options.InvokeOnFileAdded(model, property, fileArgs);
+                    }));
 
-                builder.AddAttribute(sequence++, "onfileremoved", args =>
-                {
-                    var customArgs = args as UICustomEventArgs;
-                    var fileArgs = Json.Deserialize<Components.DropZone.FileEventArgs>((string)customArgs.Value);
-                    options.InvokeOnFileRemoved(form, property, fileArgs);
-                });
+                builder.AddAttribute(sequence++, "onfileremoved",
+                    model.OnAction($"onfileremoved_{property}", args =>
+                    {
+                        var customArgs = args as UICustomEventArgs;
+                        var fileArgs = Json.Deserialize<Components.DropZone.FileEventArgs>((string)customArgs.Value);
+                        options.InvokeOnFileRemoved(model, property, fileArgs);
+                    }));
 
                 builder.WriteHtmlAttributes(ref sequence, htmlAttributes);
 

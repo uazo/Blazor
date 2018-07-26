@@ -8,19 +8,31 @@ using System.Threading.Tasks;
 namespace Blazor.DX
 {
     /// <summary></summary>
-    public class DXColorBox : BlazorComponent
+    public class DXSwitch : BlazorComponent
     {
+        /// <summary></summary>
+        [Parameter]
+        public bool readOnly { get; set; }
+
         /// <summary></summary>
         [Parameter]
         public string hint { get; set; }
 
         /// <summary></summary>
         [Parameter]
-        public Action<UICustomEventArgs> onValueChanged { get; set; }
+        public string onText { get; set; }
 
         /// <summary></summary>
         [Parameter]
-        public string applyButtonText { get; set; }
+        public string offText { get; set; }
+
+        /// <summary></summary>
+        [Parameter]
+        public bool value { get; set; }
+
+        /// <summary></summary>
+        [Parameter]
+        public bool visible { get; set; }
 
         /// <summary></summary>
         [Parameter]
@@ -28,6 +40,10 @@ namespace Blazor.DX
 
         /// <summary></summary>
         [Parameter]
-        public string value { get; set; }
+        public string width { get; set; }
+
+        /// <summary></summary>
+        [Parameter]
+        public Action<UICustomEventArgs> onValueChanged { get; set; }
     }
 }

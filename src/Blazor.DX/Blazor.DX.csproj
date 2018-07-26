@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="src\bundle.min.js" LogicalName="blazor:js:blazor.dx.bundle.js" />
+        <EmbeddedResource Include="src\bundle.js" LogicalName="blazor:js:blazor.dx.bundle.js" />
     </ItemGroup>
     
 

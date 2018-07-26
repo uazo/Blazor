@@ -17,12 +17,25 @@ export class BrowserRenderer {
   private readonly childComponentLocations: { [componentId: number]: BlazorDOMElement } = {};
 
   public readonly browserRendererId: number;
+  private renderNo: number = 0;
 
   constructor(rendererId: number) {
     this.browserRendererId = rendererId;
     this.eventDelegator = new EventDelegator((event, componentId, eventHandlerId, eventArgs) => {
       raiseEvent(event, this.browserRendererId, componentId, eventHandlerId, eventArgs);
     });
+  }
+
+  public beginRender() {
+    this.renderNo++;
+    console.log("renderBatch " + this.renderNo);
+  }
+
+  public endRender() {
+    this.renderNo--;
+
+    this.sendQueueEvents();
+    console.log("renderBatch " + (this.renderNo+1) + " finished");
   }
 
   public attachRootComponentToElement(componentId: number, element: Element) {
@@ -40,12 +53,7 @@ export class BrowserRenderer {
       throw new Error(`No element is currently associated with component ${componentId}`);
     }
 
-    let t0 = performance.now();
-
     this.applyEdits(batch, componentId, element, 0, edits, referenceFrames);
-
-    let t1 = performance.now();
-    console.log("updateComponent took " + (t1 - t0) + " milliseconds.")
   }
 
   public disposeComponent(componentId: number) {
@@ -58,6 +66,7 @@ export class BrowserRenderer {
   }
 
   private applyEdits(batch: RenderBatch, componentId: number, parent: BlazorDOMElement, childIndex: number, edits: ArraySegment<RenderTreeEdit>, referenceFrames: ArrayValues<RenderTreeFrame>) {
+    let t0 = performance.now();
 
     let currentDepth = 0;
     let childIndexAtCurrentDepth = childIndex;
@@ -178,6 +187,11 @@ export class BrowserRenderer {
       needRendering.onDOMUpdated();
       needRendering = elementsNeedRendering.pop();
     }
+
+    let t1 = performance.now();
+    let name = "";
+    if (parent.constructor) name = parent.constructor.name;
+    console.log("updateComponent " + componentId + "(" + name + ") took " + (t1 - t0) + " mills for " + editsLength);
   }
 
   private insertFrame(batch: RenderBatch, componentId: number, parent: BlazorDOMElement, childIndex: number, frames: ArrayValues<RenderTreeFrame>, frame: RenderTreeFrame, frameIndex: number): number {
@@ -239,7 +253,8 @@ export class BrowserRenderer {
       }
 
       blazorElement.onDOMUpdated();
-      blazorElement.dispose();
+      if (blazorElement.isComponent() == false)
+        blazorElement.dispose();
     }
   }
 
@@ -310,9 +325,56 @@ export class BrowserRenderer {
         return 0;
     }
   }
+
+  private _queueEvent: any[] = [];
+
+  public async raiseEvent(event: Event | null, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
+    if (this.renderNo == 0) {
+      return raiseEvent(event, this.browserRendererId, componentId, eventHandlerId, eventArgs);
+    }
+    else {
+      this._queueEvent.push({
+        event: event,
+        componentId: componentId,
+        eventHandlerId: eventHandlerId,
+        eventArgs: eventArgs
+      });
+    }
+  }
+
+  private sendQueueEvents() {
+    if (this._queueEvent.length == 0) return;
+
+    let evt = this._queueEvent.pop();
+    while (evt)
+    {
+      //raiseEvent(evt.event, this.browserRendererId, evt.componentId, evt.eventHandlerId, evt.eventArgs);
+
+      const eventDescriptor = {
+        browserRendererId: this.browserRendererId,
+        componentId: evt.componentId,
+        eventHandlerId: evt.eventHandlerId,
+        eventArgsType: evt.eventArgs.type
+      };
+
+      console.log("sendQueueEvents start " + eventDescriptor.componentId);
+      let t0 = performance.now();
+
+      DotNet.invokeMethodAsync(
+        'Microsoft.AspNetCore.Blazor.Browser',
+        'DispatchEvent',
+        eventDescriptor,
+        JSON.stringify(evt.eventArgs.data));
+
+      let t1 = performance.now();
+      console.log("sendQueueEvents " + eventDescriptor.componentId + "-" + eventDescriptor.eventArgsType + " took " + (t1 - t0) + " milliseconds.")
+
+      evt = this._queueEvent.pop();
+    }
+  }
 }
 
-export async function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
+export function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
 	if (event !== null && event.preventDefault !== undefined)
 		event.preventDefault();
 
@@ -323,13 +385,17 @@ export async function raiseEvent(event: Event | null, browserRendererId: number,
     eventArgsType: eventArgs.type
 	};
 
-	let t0 = performance.now();
-  await DotNet.invokeMethodAsync(
-    'Microsoft.AspNetCore.Blazor.Browser',
-    'DispatchEvent',
-    eventDescriptor,
-		JSON.stringify(eventArgs.data));
+  console.log("BrowserRendererEventDispatcher start " + eventDescriptor.componentId);
+
+  let t0 = performance.now();
+  window.setTimeout(() => {
+    var rt = DotNet.invokeMethodAsync(
+      'Microsoft.AspNetCore.Blazor.Browser',
+      'DispatchEvent',
+      eventDescriptor,
+      JSON.stringify(eventArgs.data));
+  }, 1);
 
 	let t1 = performance.now();
-	console.log("BrowserRendererEventDispatcher took " + (t1 - t0) + " milliseconds.")
+  console.log("BrowserRendererEventDispatcher " + eventDescriptor.componentId + "-" + eventDescriptor.eventArgsType + " took " + (t1 - t0) + " milliseconds.")
 }

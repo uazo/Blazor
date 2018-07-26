@@ -1,4 +1,4 @@
-import { BrowserRenderer, raiseEvent } from '../BrowserRenderer';
+import { BrowserRenderer } from '../BrowserRenderer';
 import { BlazorDOMElement } from './BlazorDOMElement';
 import { EventForDotNet, UIEventArgs } from '../EventForDotNet';
 
@@ -22,7 +22,7 @@ export class BlazorDOMComponent extends BlazorDOMElement {
     return this.getDOMElement().parentNode!;
   }
 
-  protected isComponent(): boolean {
+  public isComponent(): boolean {
     return true;
   }
 
@@ -31,6 +31,6 @@ export class BlazorDOMComponent extends BlazorDOMElement {
   }
 
   protected raiseEvent(eventHandlerId: number, evt: EventForDotNet<UIEventArgs>) {
-    raiseEvent(null, this.browserRenderer.browserRendererId, this.ComponentID, eventHandlerId, evt);
+    this.browserRenderer.raiseEvent(null, this.ComponentID, eventHandlerId, evt);
   }
 }

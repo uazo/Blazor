@@ -42,6 +42,17 @@ namespace Blazor.DX
             id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXDateBox));
             ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXDateBoxComponentId", id);
 
+            id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXSwitch));
+            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXSwitchComponentId", id);
+
+            id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXDropDownBox));
+            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXDropDownBoxComponentId", id);
+
+            id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXTextBox));
+            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXTextBoxComponentId", id);
+
+            id = Microsoft.AspNetCore.Blazor.Components.ComponentFactoryRegister.RegisterCustomComponent(typeof(DXTextArea));
+            ((IJSInProcessRuntime)JSRuntime.Current).Invoke<bool>("RegisterDXTextAreaComponentId", id);
             return services;
         }
     }

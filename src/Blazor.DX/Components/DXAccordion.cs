@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Blazor.DX
 {
     /// <summary></summary>
-    public class DXAccordion : BlazorComponent
+    public class DXAccordion : BlazorComponent, IDisposable
     {
         private IEnumerable<object> _dataSource;
 
@@ -20,10 +20,13 @@ namespace Blazor.DX
             get { return _dataSource; }
             set
             {
-                _dataSource = value;
+                if (_dataSource?.GetHashCode() != value?.GetHashCode())
+                {
+                    _dataSource = value;
 
-                DXTemplateRegistry.Find(itemTemplateId).Clear(dataSource?.Count() ?? 0);
-                DXTemplateRegistry.Find(itemTitleTemplateId).Clear(dataSource?.Count() ?? 0);
+                    DXTemplateRegistry.Find(itemTemplateId).Clear();
+                    DXTemplateRegistry.Find(itemTitleTemplateId).Clear();
+                }
             }
         }
 
@@ -71,8 +74,16 @@ namespace Blazor.DX
             builder.OpenElement(sequence++, "div");
             builder.CloseElement();
 
-            DXTemplateRenderer.RenderDXTemplate(builder, ref sequence, nameof(itemTitleTemplate), itemTitleTemplateId);
-            DXTemplateRenderer.RenderDXTemplate(builder, ref sequence, nameof(itemTemplate), itemTemplateId);
+            DXTemplateRenderer.RenderDXTemplate(this, builder, ref sequence, nameof(itemTitleTemplate), itemTitleTemplateId);
+            DXTemplateRenderer.RenderDXTemplate(this, builder, ref sequence, nameof(itemTemplate), itemTemplateId);
+        }
+
+        /// <summary>
+        /// </summary>
+        public void Dispose()
+        {
+            DXTemplateRegistry.DisposeDXTemplate(itemTemplateId);
+            DXTemplateRegistry.DisposeDXTemplate(itemTitleTemplateId);
         }
     }
 }

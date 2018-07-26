@@ -23,7 +23,7 @@ export class BlazorDOMElement {
     this.startContainer[logicalBlazorChildElementPropname] = [];
 	}
 
-	protected isComponent(): boolean {
+	public isComponent(): boolean {
 		return false;
 	}
 
@@ -86,7 +86,7 @@ export class BlazorDOMElement {
 
   public createElement(tagName: string, childIndex: number): Element {
     const parent = this.getClosestDomElement();
-    const newDomElement = tagName === 'svg' || parent.namespaceURI === 'http://www.w3.org/2000/svg' ?
+    const newDomElement = tagName === 'svg' || (parent != null && parent.namespaceURI === 'http://www.w3.org/2000/svg') ?
       document.createElementNS('http://www.w3.org/2000/svg', tagName) :
       document.createElement(tagName);
     return newDomElement;
@@ -147,6 +147,9 @@ export class BlazorDOMElement {
     const attributeName = frameReader.attributeName(attributeFrame)!;
 		//const toDomElement = this.Range.startContainer as Element;
 		//const browserRendererId = this.browserRenderer.browserRendererId;
+    if (attributeName === "ChildContent")
+      return;
+
     if (this.isDOMAttributeEvent(attributeName)) {
       const eventHandlerId = frameReader.attributeEventHandlerId(attributeFrame);
       if (this.applyEvent(attributeName, componentId, eventHandlerId) == true) {

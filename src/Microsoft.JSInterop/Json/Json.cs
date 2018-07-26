@@ -22,6 +22,19 @@ namespace Microsoft.JSInterop
             => SimpleJson.SimpleJson.SerializeObject(value);
 
         /// <summary>
+        ///  Serializes the value as a JSON string (NoCamelCase).
+        /// </summary>
+        /// <param name="value">The value to serialize.</param>
+        /// <returns>The JSON string.</returns>
+        public static string SerializeNoCamelCase(object value)
+            => SimpleJson.SimpleJson.SerializeObject(value, SimpleJson.SimpleJson.PocoJsonSerializerStrategyNoCamelCase);
+
+        /// <summary>
+        /// </summary>
+        public static object DeserializeObject(string json, System.Type type)
+            => SimpleJson.SimpleJson.DeserializeObject(json, type);
+
+        /// <summary>
         /// Deserializes the JSON string, creating an object of the specified generic type.
         /// </summary>
         /// <typeparam name="T">The type of object to create.</typeparam>
