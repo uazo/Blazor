@@ -5,8 +5,10 @@ import { EventDelegator } from './EventDelegator';
 import { EventForDotNet, UIEventArgs } from './EventForDotNet';
 import { applyCaptureIdToElement } from './ElementReferenceCapture';
 
+const preventDefaultEvents: { [eventType: string]: boolean } = { submit: true };
+
 import { BlazorDOMElement } from './Elements/BlazorDOMElement';
-import { createBlazorDOMComponent, createBlazorDOMElement } from './Elements/ElementCreators';
+import { createBlazorDOMComponent, createBlazorDOMElement, createBlazorMarkupComponent } from './Elements/ElementCreators';
 
 let raiseEventMethod: MethodHandle;
 let renderComponentMethod: MethodHandle;
@@ -149,6 +151,14 @@ export class BrowserRenderer {
           parent.updateText(childIndexAtCurrentDepth + siblingIndex, frameReader.textContent(frame))
           break;
         }
+        case EditType.updateMarkup: {
+          const frameIndex = editReader.newTreeIndex(edit);
+          const frame = batch.referenceFramesEntry(referenceFrames, frameIndex);
+          const siblingIndex = editReader.siblingIndex(edit);
+          parent.removeFromDom(childIndexAtCurrentDepth + siblingIndex);
+          this.insertMarkup(batch, parent, childIndexAtCurrentDepth + siblingIndex, frame);
+          break;
+        }
         case EditType.stepIn: {
           const siblingIndex = editReader.siblingIndex(edit);
           const stepInElement = parent.getLogicalChild(childIndexAtCurrentDepth + siblingIndex)!;
@@ -221,6 +231,9 @@ export class BrowserRenderer {
             throw new Error('Reference capture frames can only be children of element frames.');
           }
         }
+      case FrameType.markup:
+        this.insertMarkup(batch, parent, childIndex, frame);
+        return 1;
       default:
         const unknownType: never = frameType; // Compile-time verification that the switch was exhaustive
         throw new Error(`Unknown frame type: ${unknownType}`);
@@ -258,7 +271,7 @@ export class BrowserRenderer {
     }
   }
 
-  private insertComponent(batch: RenderBatch, parent: BlazorDOMElement, childIndex: number, frame: RenderTreeFrame, frames: ArrayValues<RenderTreeFrame>, frameIndex: number) {
+	private insertComponent(batch: RenderBatch, parent: BlazorDOMElement, childIndex: number, frame: RenderTreeFrame, frames: ArrayValues<RenderTreeFrame>, frameIndex: number) {
     // All we have to do is associate the child component ID with its location. We don't actually
     // do any rendering here, because the diff for the child will appear later in the render batch.
 
@@ -301,6 +314,17 @@ export class BrowserRenderer {
     }
 
     return (childIndex - origChildIndex); // Total number of children inserted
+  }
+
+  private insertMarkup(batch: RenderBatch, parent: BlazorDOMElement, childIndex: number, markupFrame: RenderTreeFrame) {
+    const markupContainer = createBlazorMarkupComponent(this, -1, parent, childIndex);
+
+    const markupContent = batch.frameReader.markupContent(markupFrame);
+    const parsedMarkup = markupContainer.parseMarkup(markupContent, parent.isSvgElement());
+    let logicalSiblingIndex = 0;
+    while (parsedMarkup.firstChild) {
+      markupContainer.insertNodeIntoDOM(parsedMarkup.firstChild, logicalSiblingIndex++);
+    }
   }
 
   private removeNodeFromDOM(parent: BlazorDOMElement, childIndex: number) {
@@ -377,6 +401,10 @@ export class BrowserRenderer {
 export function raiseEvent(event: Event | null, browserRendererId: number, componentId: number, eventHandlerId: number, eventArgs: EventForDotNet<UIEventArgs>) {
 	if (event !== null && event.preventDefault !== undefined)
 		event.preventDefault();
+
+  if (event !== null && preventDefaultEvents[event.type]) {
+		event.preventDefault();
+	}
 
 	const eventDescriptor = {
     browserRendererId,

@@ -12,7 +12,6 @@ import { EventForDotNet } from './Rendering/EventForDotNet'
 
 // Make the following APIs available in global scope for invocation from JS
 window['Blazor'] = {
-  platform,
   navigateTo,
 
   _internal: {

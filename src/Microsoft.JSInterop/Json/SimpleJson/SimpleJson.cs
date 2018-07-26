@@ -67,7 +67,6 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.JSInterop;
-using Microsoft.JSInterop.Internal;
 using SimpleJson.Reflection;
 
 // ReSharper disable LoopCanBeConvertedToQuery
@@ -1284,7 +1283,7 @@ namespace SimpleJson
         private bool _camelCase;
 
         /// <summary></summary>
-        public PocoJsonSerializerStrategy(bool camelCase)
+        public PocoJsonSerializerStrategy(bool camelCase = true)
         {
             _camelCase = camelCase;
             ConstructorCache = new ReflectionUtils.ThreadSafeDictionary<Type, ReflectionUtils.ConstructorDelegate>(ConstructorDelegateFactory);
@@ -1555,8 +1554,6 @@ namespace SimpleJson
                 output = input.ToString();
             else if (input is TimeSpan)
                 output = ((TimeSpan)input).ToString("c");
-            else if (input is ICustomJsonSerializer customJsonSerializer)
-                output = customJsonSerializer.ToJsonPrimitive();
             else
             {
                 Enum inputEnum = input as Enum;

@@ -2,6 +2,7 @@ import { BrowserRenderer } from '../BrowserRenderer';
 import { getRegisteredCustomTag } from './RenderingFunction';
 import { BlazorINPUTElement } from './BlazorINPUTElement';
 import { RenderBatch, ArraySegment, ArrayRange, RenderTreeEdit, RenderTreeFrame, EditType, FrameType, ArrayValues } from '../RenderBatch/RenderBatch';
+import { createBlazorMarkupComponent } from './ElementCreators'
 
 const logicalBlazorDomElementPropname = createSymbolOrFallback('_blazorDomElement');
 const logicalBlazorChildElementPropname = createSymbolOrFallback('_blazorDomChild');
@@ -140,7 +141,11 @@ export class BlazorDOMElement {
 	public updateText(childIndex: number, newText: string | null) {
 		const domTextNode = this.getLogicalChild(childIndex) as Text;
 		domTextNode.textContent = newText;
-	}
+  }
+
+  public isSvgElement() {
+    return this.getClosestDomElement().namespaceURI === 'http://www.w3.org/2000/svg';
+  }
 
   public applyAttribute(batch: RenderBatch, componentId: number, attributeFrame: RenderTreeFrame) {
     const frameReader = batch.frameReader;

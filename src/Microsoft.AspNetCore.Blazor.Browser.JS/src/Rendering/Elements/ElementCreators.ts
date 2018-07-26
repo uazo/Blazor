@@ -2,6 +2,7 @@ import { BrowserRenderer } from '../BrowserRenderer';
 import { BlazorDOMElement, getBlazorDomElement } from './BlazorDOMElement';
 import { BlazorDOMComponent } from './BlazorDOMComponent';
 import { BlazorINPUTElement } from './BlazorINPUTElement';
+import { BlazorMarkupElement } from './BlazorMarkupElement';
 
 import { getRegisteredCustomTag, getRegisteredCustomDOMElement } from './RenderingFunction';
 
@@ -20,6 +21,10 @@ export function createBlazorDOMElement(br: BrowserRenderer, stepInElement: Eleme
 			return new BlazorDOMElement(br, stepInElement);
 		}
 	}
+}
+
+export function createBlazorMarkupComponent(br: BrowserRenderer, componentId: number, parent: BlazorDOMElement, childIndex: number): BlazorMarkupElement {
+  return new BlazorMarkupElement(componentId, parent, childIndex, br);
 }
 
 export function createBlazorDOMComponent(br: BrowserRenderer, componentId: number, parent: BlazorDOMElement, childIndex: number, customComponentType: number): BlazorDOMComponent {

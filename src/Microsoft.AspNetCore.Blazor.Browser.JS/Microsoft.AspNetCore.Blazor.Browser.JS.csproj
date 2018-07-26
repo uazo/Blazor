@@ -26,6 +26,7 @@
     <WebpackInputs Remove="src\Rendering\BlazorDOMComponent.ts" />
     <WebpackInputs Remove="src\Rendering\BlazorDOMElement.ts" />
     <WebpackInputs Remove="src\Rendering\Elements\BlazorINPUTElement.ts" />
+    <WebpackInputs Remove="src\Rendering\Elements\BlazorMarkupElement.ts" />
     <WebpackInputs Remove="src\Rendering\Elements\ElementCreators.ts" />
     <WebpackInputs Remove="types\Rendering\Elements\BlazorDOMComponent.d.ts" />
   </ItemGroup>
