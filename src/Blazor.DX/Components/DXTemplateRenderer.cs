@@ -21,6 +21,8 @@ namespace Blazor.DX
         [Parameter]
         private int templateRegistryID { get; set; }
 
+        static int nUpdate = 0;
+
         /// <summary></summary>
         protected override void BuildRenderTree(RenderTreeBuilder builder)
         {
@@ -30,14 +32,21 @@ namespace Blazor.DX
 
             //Console.WriteLine($"{templateRegistryID} templateItemCount ={registry.templateItems.Count}");
             int sequence = 1;
-            foreach(var key in registry.templateItems.Keys)
+            var keys = registry.templateItems.Keys.OrderBy( x=> x ).ToArray();
+            foreach (var key in keys)
             {
-                builder.OpenElement(sequence++, "div");
+                string startElement = "DIV";
+                var item = registry.templateItems[key];
+                if (item.NeedUpdate)
+                {
+                    item.NeedUpdate = false;
+                    startElement += $".{nUpdate++}";
+                }
+
+                builder.OpenElement(sequence++, startElement);
                 builder.AddAttribute(sequence++, "btplid", key);
                 //Console.WriteLine($"{templateName} {t} {registry.templateItems.ContainsKey(t)}");
-                var item = registry.templateItems[key];
 
-                //builder.AddAttribute(sequence++, "item", item._Version);
                 if (registry.itemSimpleTemplate != null)
                 {
                     builder.AddContent(sequence++, RenderSimpleTemplate(registry));
@@ -46,6 +55,7 @@ namespace Blazor.DX
                 {
                     builder.AddContent(sequence++, RenderItemTemplate(registry, item));
                 }
+                
                 builder.CloseElement();
             }
         }
@@ -79,7 +89,7 @@ namespace Blazor.DX
                         item = Json.Deserialize<DXTemplateItem>((string)args.Value);
 
                     var registry = DXTemplateRegistry.Find(templateRegistryID);
-                    item._Version++;
+                    item.NeedUpdate = true;
                     registry.templateItems[item.itemIndex] = item;
                     //Console.WriteLine($"onRenderTemplate {templateName} {item.itemIndex} {registry.templateItems.Count}");
                 }));
@@ -151,10 +161,11 @@ namespace Blazor.DX
 
         internal void Clear()
         {
-            templateItems.Clear();
+            foreach (var i in templateItems.Values) i.NeedUpdate = true;
+            //templateItems.Clear();
 
-            if (itemSimpleTemplate != null)
-                templateItems.Add(0, new DXTemplateItem());
+            //if (itemSimpleTemplate != null)
+            //    templateItems.Add(0, new DXTemplateItem());
         }
 
         internal static void DisposeDXTemplate(int itemTemplateId)
@@ -167,7 +178,7 @@ namespace Blazor.DX
     /// <summary></summary>
     public class DXTemplateItem
     {
-        internal int _Version { get; set; }
+        internal bool NeedUpdate { get; set; }
 
         /// <summary></summary>
         public string itemData { get; set; }
