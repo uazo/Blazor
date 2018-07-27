@@ -12,7 +12,7 @@
     </div>
 </div>
 
-@*<br />
+<br />
 <div>
     <div><h4>DXCalendar</h4></div>
     <div>
@@ -31,7 +31,7 @@
         <DXButton text="Disable/Enable"
                   onclick="(x => { colorboxDisabled = !colorboxDisabled; this.StateHasChanged(); })"></DXButton>
     </div>
-</div>*@
+</div>
 
 <br />
 <div>
@@ -51,7 +51,7 @@
     </div>
 </div>
 
-@*<br />
+<br />
 <div>
     <div>DXCheckBox</div>
     <div>
@@ -63,7 +63,8 @@
 <div>
     <div>DXCheckBox</div>
     <div>
-        <DXList dataSource="this.listString" itemDeleteMode="@ItemDeleteMode.Toggle" allowItemDeleting="true">
+        <DXList dataSource="this.listString" itemDeleteMode="@ItemDeleteMode.Toggle" allowItemDeleting="true"
+                onItemDeleted="@(x=> remove(x))">
             <DXList.itemTemplate WithParams="item">
                 prova
                 <DXCheckBox text="chk"></DXCheckBox>
@@ -77,7 +78,7 @@
 <div>
     <div>DXLookUp</div>
     <div>
-        <DXLookUp dataSource="this.listString2" onOpened="onOpened">
+        <DXLookUp dataSource="this.listString" onOpened="onOpened">
             <DXLookUp.itemTemplate WithParams="item">
                 test @item.itemData
             </DXLookUp.itemTemplate>
@@ -98,7 +99,7 @@
         @data
     </div>
 </div>
-*@
+
 
 <div>
     <span disabled="@colorboxDisabled">
@@ -110,7 +111,6 @@
   string Text = "Example Button";
   bool colorboxDisabled = true;
   List<string> listString;
-  List<string> listString2;
   System.DateTime data = System.DateTime.Now;
 
   protected override void OnInit()
@@ -130,6 +130,11 @@
   {
       this.data = NewData;
       this.StateHasChanged();
+  }
+
+  protected void remove(UIListEventArgs e)
+  {
+      remove(e.itemIndex);
   }
 
   protected void remove(int index)
@@ -166,7 +171,6 @@
   protected void onOpened(UICustomEventArgs e)
   {
       Console.WriteLine("onOpened");
-      this.listString2 = this.listString;
       this.StateHasChanged();
   }
 }
