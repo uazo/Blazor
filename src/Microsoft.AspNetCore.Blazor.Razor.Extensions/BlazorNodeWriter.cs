@@ -20,6 +20,8 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
         public abstract void WriteHtmlElement(CodeRenderingContext context, HtmlElementIntermediateNode node);
 
+        public abstract void WriteHtmlBlock(CodeRenderingContext context, HtmlBlockIntermediateNode node);
+
         public abstract void WriteReferenceCapture(CodeRenderingContext context, RefExtensionNode node);
 
         public sealed override void BeginWriterScope(CodeRenderingContext context, string writer)

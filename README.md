@@ -109,7 +109,7 @@ You can browse https://dotnet.myget.org/gallery/blazor-dev to find the current v
 ```xml
 <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Blazor.Browser" Version="0.3.0-preview1-10220" />
-    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="0.3.0-preview1-10220" />
+    <PackageReference Include="Microsoft.AspNetCore.Blazor.Build" Version="0.3.0-preview1-10220" PrivateAssets="all" />
     <DotNetCliToolReference Include="Microsoft.AspNetCore.Blazor.Cli" Version="0.3.0-preview1-10220" />
 </ItemGroup>
 ```
@@ -122,7 +122,7 @@ You should then be able to install or update the Blazor Language Service extensi
 
 ## Contributing
 
-There are lots of ways that you can contribute to Blazor! Read our [contributing guide](https://github.com/aspnet/Blazor/blob/dev/CONTRIBUTING.md) to learn about our development process and how to propose bug fixes and improvements.
+There are lots of ways that you can contribute to Blazor! Read our [contributing guide](https://github.com/aspnet/Blazor/blob/master/CONTRIBUTING.md) to learn about our development process and how to propose bug fixes and improvements.
 
 ## Still got questions?
 

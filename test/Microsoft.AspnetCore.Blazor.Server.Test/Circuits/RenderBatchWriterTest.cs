@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Blazor.Rendering;
 using Microsoft.AspNetCore.Blazor.RenderTree;
 using Microsoft.AspNetCore.Blazor.Server.Circuits;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Xunit;
@@ -146,6 +147,8 @@ namespace Microsoft.AspNetCore.Blazor.Server
                 RenderTreeEdit.UpdateText(105, 106),
                 RenderTreeEdit.StepIn(107),
                 RenderTreeEdit.StepOut(),
+                RenderTreeEdit.UpdateMarkup(108, 109),
+                RenderTreeEdit.RemoveAttribute(110, "Some removed attribute"), // To test deduplication
             };
             var bytes = Serialize(new RenderBatch(
                 new ArrayRange<RenderTreeDiff>(new[]
@@ -165,15 +168,20 @@ namespace Microsoft.AspNetCore.Blazor.Server
 
             AssertBinaryContents(bytes, 0,
                 123, // Component ID for diff 0
-                7,  // diff[0].Edits.Count
+                9,  // diff[0].Edits.Count
                 RenderTreeEditType.PrependFrame, 456, 789, NullStringMarker,
                 RenderTreeEditType.RemoveFrame, 101, 0, NullStringMarker,
                 RenderTreeEditType.SetAttribute, 102, 103, NullStringMarker,
                 RenderTreeEditType.RemoveAttribute, 104, 0, "Some removed attribute",
                 RenderTreeEditType.UpdateText, 105, 106, NullStringMarker,
                 RenderTreeEditType.StepIn, 107, 0, NullStringMarker,
-                RenderTreeEditType.StepOut, 0, 0, NullStringMarker
+                RenderTreeEditType.StepOut, 0, 0, NullStringMarker,
+                RenderTreeEditType.UpdateMarkup, 108, 109, NullStringMarker,
+                RenderTreeEditType.RemoveAttribute, 110, 0, "Some removed attribute"
             );
+
+            // We can deduplicate attribute names
+            Assert.Equal(new[] { "Some removed attribute" }, ReadStringTable(bytes));
         }
 
         [Fact]
@@ -198,14 +206,24 @@ namespace Microsoft.AspNetCore.Blazor.Server
                     RenderTreeFrame.Region(130)
                         .WithRegionSubtreeLength(1234),
                     RenderTreeFrame.Text(131, "Some text"),
-                }, 9),
+                    RenderTreeFrame.Markup(132, "Some markup"),
+                    RenderTreeFrame.Text(133, "\n\t  "),
+
+                    // Testing deduplication
+                    RenderTreeFrame.Attribute(134, "Attribute with string value", "String value"),
+                    RenderTreeFrame.Element(135, "Some element") // Will be dedupliated
+                        .WithElementSubtreeLength(999),
+                    RenderTreeFrame.Text(136, "Some text"), // Will not be deduplicated
+                    RenderTreeFrame.Markup(137, "Some markup"), // Will not be deduplicated
+                    RenderTreeFrame.Text(138, "\n\t  "), // Will be deduplicated
+                }, 16),
                 default,
                 default));
 
             // Assert
             var referenceFramesStartIndex = ReadInt(bytes, bytes.Length - 16);
             AssertBinaryContents(bytes, referenceFramesStartIndex,
-                9, // Number of frames
+                16, // Number of frames
                 RenderTreeFrameType.Attribute, "Attribute with string value", "String value", 0,
                 RenderTreeFrameType.Attribute, "Attribute with nonstring value", NullStringMarker, 0,
                 RenderTreeFrameType.Attribute, "Attribute with delegate value", NullStringMarker, 789,
@@ -214,8 +232,31 @@ namespace Microsoft.AspNetCore.Blazor.Server
                 RenderTreeFrameType.Element, 1234, "Some element", 0,
                 RenderTreeFrameType.ElementReferenceCapture, "my unique ID", 0, 0,
                 RenderTreeFrameType.Region, 1234, 0, 0,
-                RenderTreeFrameType.Text, "Some text", 0, 0
+                RenderTreeFrameType.Text, "Some text", 0, 0,
+                RenderTreeFrameType.Markup, "Some markup", 0, 0,
+                RenderTreeFrameType.Text, "\n\t  ", 0, 0,
+                RenderTreeFrameType.Attribute, "Attribute with string value", "String value", 0,
+                RenderTreeFrameType.Element, 999, "Some element", 0,
+                RenderTreeFrameType.Text, "Some text", 0, 0,
+                RenderTreeFrameType.Markup, "Some markup", 0, 0,
+                RenderTreeFrameType.Text, "\n\t  ", 0, 0
             );
+
+            Assert.Equal(new[]
+            {
+                "Attribute with string value",
+                "String value",
+                "Attribute with nonstring value",
+                "Attribute with delegate value",
+                "Some element",
+                "my unique ID",
+                "Some text",
+                "Some markup",
+                "\n\t  ",
+                "String value",
+                "Some text",
+                "Some markup",
+            }, ReadStringTable(bytes));
         }
 
         private Span<byte> Serialize(RenderBatch renderBatch)
@@ -228,12 +269,34 @@ namespace Microsoft.AspNetCore.Blazor.Server
             }
         }
 
-        static void AssertBinaryContents(Span<byte> data, int startIndex, params object[] entries)
+        static string[] ReadStringTable(Span<byte> data)
         {
             var bytes = data.ToArray();
 
-            // The string table position is given by the final int
+            // The string table position is given by the final int, and continues
+            // until we get to the final set of top-level indices
             var stringTableStartPosition = BitConverter.ToInt32(bytes, bytes.Length - 4);
+            var stringTableEndPositionExcl = bytes.Length - 20;
+
+            var result = new List<string>();
+            for (var entryPosition = stringTableStartPosition;
+                entryPosition < stringTableEndPositionExcl;
+                entryPosition += 4)
+            {
+                // The string table entries are all length-prefixed UTF8 blobs
+                var tableEntryPos = BitConverter.ToInt32(bytes, entryPosition);
+                var length = (int)ReadUnsignedLEB128(bytes, tableEntryPos, out var numLEB128Bytes);
+                var value = Encoding.UTF8.GetString(bytes, tableEntryPos + numLEB128Bytes, length);
+                result.Add(value);
+            }
+
+            return result.ToArray();
+        }
+
+        static void AssertBinaryContents(Span<byte> data, int startIndex, params object[] entries)
+        {
+            var bytes = data.ToArray();
+            var stringTableEntries = ReadStringTable(data);
 
             using (var ms = new MemoryStream(bytes))
             using (var reader = new BinaryReader(ms))
@@ -263,11 +326,7 @@ namespace Microsoft.AspNetCore.Blazor.Server
                         }
                         else
                         {
-                            // The string table entries are all length-prefixed UTF8 blobs
-                            var tableEntryPos = BitConverter.ToInt32(bytes, stringTableStartPosition + 4 * indexIntoStringTable);
-                            var length = (int)ReadUnsignedLEB128(bytes, tableEntryPos, out var numLEB128Bytes);
-                            var value = Encoding.UTF8.GetString(bytes, tableEntryPos + numLEB128Bytes, length);
-                            Assert.Equal(expectedString, value);
+                            Assert.Equal(expectedString, stringTableEntries[indexIntoStringTable]);
                         }
                     }
                     else

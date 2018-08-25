@@ -17,6 +17,20 @@ namespace Microsoft.JSInterop
         private readonly ConcurrentDictionary<long, object> _pendingTasks
             = new ConcurrentDictionary<long, object>();
 
+        internal InteropArgSerializerStrategy ArgSerializerStrategy { get; }
+
+        /// <summary>
+        /// Constructs an instance of <see cref="JSRuntimeBase"/>.
+        /// </summary>
+        public JSRuntimeBase()
+        {
+            ArgSerializerStrategy = new InteropArgSerializerStrategy(this);
+        }
+
+        /// <inheritdoc />
+        public void UntrackObjectRef(DotNetObjectRef dotNetObjectRef)
+            => ArgSerializerStrategy.ReleaseDotNetObject(dotNetObjectRef);
+
         /// <summary>
         /// Invokes the specified JavaScript function asynchronously.
         /// </summary>
@@ -36,7 +50,10 @@ namespace Microsoft.JSInterop
 
             try
             {
-                BeginInvokeJS(taskId, identifier, args?.Length > 0 ? Json.Serialize(args) : null);
+                var argsJson = args?.Length > 0
+                    ? Json.Serialize(args, ArgSerializerStrategy)
+                    : null;
+                BeginInvokeJS(taskId, identifier, argsJson);
                 return tcs.Task;
             }
             catch
@@ -70,7 +87,7 @@ namespace Microsoft.JSInterop
                 callId,
                 success,
                 resultOrException
-            }));
+            }, ArgSerializerStrategy));
         }
 
         internal void EndInvokeJS(long asyncHandle, bool succeeded, object resultOrException)
@@ -82,6 +99,12 @@ namespace Microsoft.JSInterop
 
             if (succeeded)
             {
+                var resultType = TaskGenericsUtil.GetTaskCompletionSourceResultType(tcs);
+                if (resultOrException is SimpleJson.JsonObject || resultOrException is SimpleJson.JsonArray)
+                {
+                    resultOrException = ArgSerializerStrategy.DeserializeObject(resultOrException, resultType);
+                }
+
                 TaskGenericsUtil.SetTaskCompletionSourceResult(tcs, resultOrException);
             }
             else

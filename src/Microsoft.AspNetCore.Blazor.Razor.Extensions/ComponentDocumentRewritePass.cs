@@ -23,7 +23,7 @@ namespace Microsoft.AspNetCore.Blazor.Razor
     {
         // Per the HTML spec, the following elements are inherently self-closing
         // For example, <img> is the same as <img /> (and therefore it cannot contain descendants)
-        private readonly static HashSet<string> VoidElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        public readonly static HashSet<string> VoidElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr",
         };
@@ -150,6 +150,17 @@ namespace Microsoft.AspNetCore.Blazor.Razor
 
                             switch (token.Type)
                             {
+                                case HtmlTokenType.Doctype:
+                                    {
+                                        // DocType isn't meaningful in Blazor. We don't process them in the runtime
+                                        // it wouldn't really mean much anyway since we build a DOM directly rather
+                                        // than letting the user-agent parse the document.
+                                        //
+                                        // For now, <!DOCTYPE html> and similar things will just be skipped by the compiler
+                                        // unless we come up with something more meaningful to do.
+                                        break;
+                                    }
+
                                 case HtmlTokenType.Character:
                                     {
                                         // Text content
@@ -403,6 +414,13 @@ namespace Microsoft.AspNetCore.Blazor.Razor
                     throw new InvalidOperationException("You need to call Push first.");
                 }
 
+                // This will decode any HTML entities into their textual equivalent.
+                //
+                // This is OK because an HtmlContent node is used with document.createTextNode
+                // in the DOM, which can accept content that has decoded entities.
+                //
+                // In the event that we merge HtmlContent into an HtmlBlock, we need to
+                // re-encode the entites. That's done in the HtmlBlock pass.
                 var tokens = _textSource.Tokenize(HtmlEntityService.Resolver);
                 return tokens;
             }
