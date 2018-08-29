@@ -662,7 +662,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                 newFrame.AttributeName.Length >= 3 &&
                 newFrame.AttributeName.StartsWith("on"))
             {
-                diffContext.Renderer.AssignEventHandlerId(ref newFrame, 0);
+                diffContext.Renderer.AssignEventHandlerId(ref newFrame);
             }
         }
 
