@@ -458,11 +458,17 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
             {
                 if (oldFrame.AttributeEventHandlerId > 0)
                 {
-                    diffContext.BatchBuilder.DisposedEventHandlerIds.Append(oldFrame.AttributeEventHandlerId);
+                    // DONT REMOVE, SIMPLY CHANGE
+                    //diffContext.BatchBuilder.DisposedEventHandlerIds.Append(oldFrame.AttributeEventHandlerId);
+                    diffContext.Renderer.AssignEventHandlerId(ref newFrame, oldFrame.AttributeEventHandlerId);
+                    newFrame = oldFrame;
                 }
-                InitializeNewAttributeFrame(ref diffContext, ref newFrame);
-                var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
-                diffContext.Edits.Append(RenderTreeEdit.SetAttribute(diffContext.SiblingIndex, referenceFrameIndex));
+                else
+                {
+                    InitializeNewAttributeFrame(ref diffContext, ref newFrame);
+                    var referenceFrameIndex = diffContext.ReferenceFrames.Append(newFrame);
+                    diffContext.Edits.Append(RenderTreeEdit.SetAttribute(diffContext.SiblingIndex, referenceFrameIndex));
+                }
             }
             else if (oldFrame.AttributeEventHandlerId > 0)
             {
@@ -656,7 +662,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                 newFrame.AttributeName.Length >= 3 &&
                 newFrame.AttributeName.StartsWith("on"))
             {
-                diffContext.Renderer.AssignEventHandlerId(ref newFrame);
+                diffContext.Renderer.AssignEventHandlerId(ref newFrame, 0);
             }
         }
 

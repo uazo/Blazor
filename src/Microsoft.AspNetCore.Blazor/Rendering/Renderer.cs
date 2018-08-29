@@ -109,13 +109,16 @@ namespace Microsoft.AspNetCore.Blazor.Rendering
             frame = frame.WithComponentInstance(newComponentId, newComponent);
         }
 
-        internal void AssignEventHandlerId(ref RenderTreeFrame frame)
+        internal void AssignEventHandlerId(ref RenderTreeFrame frame, int id)
         {
-            var id = ++_lastEventHandlerId;
+            if( id <= 0 ) id = ++_lastEventHandlerId;
 
             if (frame.AttributeValue is MulticastDelegate @delegate)
             {
-               _eventBindings.Add(id, new EventHandlerInvoker(@delegate));
+                if (_eventBindings.ContainsKey(id))
+                    _eventBindings[id] = new EventHandlerInvoker(@delegate);
+                else
+                    _eventBindings.Add(id, new EventHandlerInvoker(@delegate));
             }
 
             frame = frame.WithAttributeEventHandlerId(id);

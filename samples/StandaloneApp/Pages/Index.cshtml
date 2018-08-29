@@ -1,5 +1,54 @@
-﻿@page "/"
+@page "/"
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+
+@{
+  var xCollection = "1,2,3".Split(',');
+  b++;
+}
+
+@foreach (var x in xCollection)
+{
+    <li>x.Name <a onclick="@(() => HandleClick2(x))">Click me</a></li>
+}
+a= @a
+b= @b
+
+    //More code
+
+@functions {
+
+  int a = 0;
+  static int b = 0;
+
+  //private void d(string pp)
+  //{
+  //}
+
+  //Action<UIMouseEventArgs, string> HandleClickAction
+  //{
+  //    get {
+  //        return ((e, q) =>
+  //        {
+  //            a += int.Parse(q);
+  //        });
+  //    }
+  //}
+
+  //Action<UIMouseEventArgs> retValue;
+  //private Action<UIMouseEventArgs> HandleClick(string p)
+  //{
+  //    return retValue != null ? retValue : retValue = (e) => HandleClick2(p);
+  //}
+
+  private void HandleClick2(string p)
+  {
+      a += int.Parse(p) + b;
+  }
+
+
+
+}
