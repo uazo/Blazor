@@ -459,9 +459,7 @@ namespace Microsoft.AspNetCore.Blazor.RenderTree
                 if (oldFrame.AttributeEventHandlerId > 0)
                 {
                     // DONT REMOVE, SIMPLY CHANGE
-                    //diffContext.BatchBuilder.DisposedEventHandlerIds.Append(oldFrame.AttributeEventHandlerId);
                     diffContext.Renderer.AssignEventHandlerId(ref newFrame, oldFrame.AttributeEventHandlerId);
-                    newFrame = oldFrame;
                 }
                 else
                 {
