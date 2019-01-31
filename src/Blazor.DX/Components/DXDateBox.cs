@@ -35,7 +35,7 @@ namespace Blazor.DX
 
         /// <summary></summary>
         [Parameter]
-        public System.DateTime value { get; set; }
+        public System.DateTime? value { get; set; }
 
         /// <summary></summary>
         [Parameter]
