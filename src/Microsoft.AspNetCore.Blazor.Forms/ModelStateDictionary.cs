@@ -32,7 +32,8 @@ namespace Microsoft.AspNetCore.Blazor.Forms
             new SingleConverter(), new DoubleConverter(),
             new GuidConverter(),
             new EnumConverter(typeof(object)),
-            new NullableConverter(typeof(int?))
+            new NullableConverter(typeof(int?)),
+            new DecimalConverter()
         };
 
         /// <summary>
@@ -192,7 +193,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms
                     {
                     }
 
-                    if (propertyType == typeof(System.DateTime) && string.IsNullOrWhiteSpace(value))
+                    if ((propertyType == typeof(System.DateTime) || propertyType == typeof(System.DateTime?)) && string.IsNullOrWhiteSpace(value))
                     {
                         // special case for datetime
                         // typeConverter.ConvertFromString("") returns System.DateTime.MinValue

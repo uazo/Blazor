@@ -19,7 +19,7 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
 		/// <returns></returns>
 		public static string GetDisplayName( PropertyInfo property )
 		{
-			var display = property.GetCustomAttribute<System.ComponentModel.DataAnnotations.DisplayAttribute>();
+			var display = property.GetCustomAttribute<System.ComponentModel.DataAnnotations.DisplayAttribute>(true);
 			if (display != null) return display.Name;
 			return property.Name;
 		}
