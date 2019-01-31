@@ -37,6 +37,12 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
             /// </summary>
             public Func<string, string> GetUrl { get; set; }
 
+
+            /// <summary>
+            /// Set Authorization Header value
+            /// </summary>
+            public string AuthorizationHeader { get; set; }
+
             /// <summary>
             /// 
             /// </summary>
@@ -112,6 +118,8 @@ namespace Microsoft.AspNetCore.Blazor.Forms.Extensions
                 builder.AddAttribute(sequence++, "Id", property.Name);
                 builder.AddAttribute(sequence++, "Url", options.PostUrl);
                 builder.AddAttribute(sequence++, "MaxFiles", options.MaxFiles);
+                if( string.IsNullOrEmpty(options.AuthorizationHeader) == false)
+                    builder.AddAttribute(sequence++, "AuthorizationHeader", options.AuthorizationHeader);
                 builder.AddAttribute(sequence++, "Value", currentValue == null ? string.Empty : currentValue);
 
                 builder.AddAttribute(sequence++, "onfileadded",
