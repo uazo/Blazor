@@ -3,6 +3,7 @@ import { getRegisteredCustomTag } from './RenderingFunction';
 import { BlazorINPUTElement } from './BlazorINPUTElement';
 import { RenderBatch, ArraySegment, ArrayRange, RenderTreeEdit, RenderTreeFrame, EditType, FrameType, ArrayValues } from '../RenderBatch/RenderBatch';
 import { createBlazorMarkupComponent } from './ElementCreators'
+import { BlazorDOMComponent } from './BlazorDOMComponent';
 
 const logicalBlazorDomElementPropname = createSymbolOrFallback('_blazorDomElement');
 const logicalBlazorChildElementPropname = createSymbolOrFallback('_blazorDomChild');
@@ -106,8 +107,14 @@ export class BlazorDOMElement {
 			}
 		}
     else {
-      (realSibling as Node).parentElement!.insertBefore(node, realSibling as Node);
-			// better than parentElement.insertBefore(node, realSibling as Node);
+      if (realSibling instanceof BlazorDOMElement == true) {
+        const realElement = (realSibling as BlazorDOMElement).getDOMElement();
+        realElement.parentElement!.insertBefore(node, realElement as Node);
+      }
+      else {
+        (realSibling as Node).parentElement!.insertBefore(node, realSibling as Node);
+        // better than parentElement.insertBefore(node, realSibling as Node);
+      }
 		}
 
     this.startContainer[logicalBlazorChildElementPropname] = [];
